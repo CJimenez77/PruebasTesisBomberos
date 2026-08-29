@@ -3,7 +3,7 @@ def test_login_success(client):
     response = client.post(
         "/api/v1/auth/login",
         data={
-            "username": "cristian.jimenez2201@alumnos.ubiobio.cl",
+            "username": "director@bomberoschillanviejo.cl",
             "password": "any_password_for_staging",
         },
     )
@@ -12,7 +12,7 @@ def test_login_success(client):
     assert "access_token" in data
     assert data["token_type"] == "bearer"
     assert data["role"] == "DIRECTOR"
-    assert "Cristian Jiménez" in data["user_name"]
+    assert "Carlos Mendoza" in data["user_name"]
 
 
 def test_auth_me_protected_endpoint(client):
@@ -21,7 +21,7 @@ def test_auth_me_protected_endpoint(client):
     login_res = client.post(
         "/api/v1/auth/login",
         data={
-            "username": "matias.aguilera@alumnos.ubiobio.cl",
+            "username": "capitan@bomberoschillanviejo.cl",
             "password": "secret_staging",
         },
     )
@@ -34,8 +34,8 @@ def test_auth_me_protected_endpoint(client):
     )
     assert response.status_code == 200
     user_data = response.json()
-    assert user_data["email"] == "matias.aguilera@alumnos.ubiobio.cl"
-    assert "Matías Aguilera" in user_data["nombre"]
+    assert user_data["email"] == "capitan@bomberoschillanviejo.cl"
+    assert "Rodrigo Silva" in user_data["nombre"]
     assert user_data["role_name"] == "CAPITAN"
 
 

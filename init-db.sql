@@ -1,7 +1,7 @@
 -- ==============================================================================
 -- BASE DE DATOS OFICIAL Y DATASET SINTÉTICO DE ALTA FIDELIDAD
 -- MÓDULO DE INVENTARIOS Y TRAZABILIDAD - SEXTA COMPAÑÍA DE BOMBEROS CHILLÁN VIEJO
--- TESIS UBB: CRISTIAN JIMÉNEZ FUENTES & MATÍAS AGUILERA IBARRA
+-- AMBIENTE DE PRUEBAS Y STAGING (DATOS Y USUARIOS FICTICIOS)
 -- ==============================================================================
 
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
@@ -124,7 +124,7 @@ CREATE TABLE IF NOT EXISTS ALERTA_DISCREPANCIA (
 );
 
 -- ==============================================================================
--- POBLADO DE DATOS MAESTROS Y SINTÉTICOS DE ALTA FIDELIDAD
+-- POBLADO DE DATOS MAESTROS Y USUARIOS FICTICIOS DE PRUEBA
 -- ==============================================================================
 
 -- Roles Institucionales
@@ -137,13 +137,13 @@ INSERT INTO ROL (id_rol, nombre) VALUES
 (6, 'ADMIN_PORTAL')
 ON CONFLICT (id_rol) DO UPDATE SET nombre = EXCLUDED.nombre;
 
--- Usuarios Oficiales del Cuartel
+-- Usuarios Oficiales Ficticios del Cuartel
 INSERT INTO USUARIO (id_usuario, id_voluntario, nombre, email, id_rol) VALUES
-(1, 101, 'Cristian Jiménez Fuentes', 'cristian.jimenez2201@alumnos.ubiobio.cl', 1),
-(2, 102, 'Matías Aguilera Ibarra', 'matias.aguilera@alumnos.ubiobio.cl', 2),
-(3, 103, 'Teniente Primero Juan Rivas', 'teniente1@bomberoschillanviejo.cl', 3),
-(4, 104, 'Encargado Pedro Morales', 'inventario@bomberoschillanviejo.cl', 4),
-(5, 105, 'Voluntario Diego Carrasco', 'voluntario1@bomberoschillanviejo.cl', 5)
+(1, 101, 'Carlos Mendoza Rivas', 'director@bomberoschillanviejo.cl', 1),
+(2, 102, 'Rodrigo Silva Morales', 'capitan@bomberoschillanviejo.cl', 2),
+(3, 103, 'Andrés Soto Valenzuela', 'teniente1@bomberoschillanviejo.cl', 3),
+(4, 104, 'Patricio Fuentes Bravo', 'inventario@bomberoschillanviejo.cl', 4),
+(5, 105, 'Felipe González Araya', 'voluntario1@bomberoschillanviejo.cl', 5)
 ON CONFLICT (id_usuario) DO UPDATE SET nombre = EXCLUDED.nombre, email = EXCLUDED.email, id_rol = EXCLUDED.id_rol;
 
 -- Clasificación de Ítems

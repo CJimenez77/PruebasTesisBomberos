@@ -68,16 +68,16 @@
       <div class="pt-4 border-t border-bomberos-border/60 space-y-3">
         <div class="flex items-center justify-between">
           <span class="text-[11px] font-extrabold uppercase tracking-wider text-gray-400">
-            Acceso Rápido por Funcionalidad Operativa
+            Acceso Rápido por Funcionalidad Operativa (Perfiles Ficticios)
           </span>
-          <span class="text-[10px] text-gray-500 font-mono">Entorno Staging</span>
+          <span class="text-[10px] text-gray-500 font-mono">Staging</span>
         </div>
 
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
           <!-- Perfil 1: Resolución de Alertas & Mando -->
           <button
             type="button"
-            @click="setQuickProfile('cristian.jimenez2201@alumnos.ubiobio.cl', 'DIRECTOR')"
+            @click="setQuickProfile('director@bomberoschillanviejo.cl', 'DIRECTOR')"
             class="text-left p-3 rounded-xl bg-bomberos-card border border-bomberos-border hover:border-bomberos-red transition-all group"
           >
             <div class="flex items-center justify-between">
@@ -96,7 +96,7 @@
           <!-- Perfil 2: Inspección Terreno Post-Emergencia -->
           <button
             type="button"
-            @click="setQuickProfile('matias.aguilera@alumnos.ubiobio.cl', 'CAPITAN')"
+            @click="setQuickProfile('capitan@bomberoschillanviejo.cl', 'CAPITAN')"
             class="text-left p-3 rounded-xl bg-bomberos-card border border-bomberos-border hover:border-bomberos-red transition-all group"
           >
             <div class="flex items-center justify-between">
@@ -170,7 +170,7 @@ const router = useRouter()
 
 const setQuickProfile = (targetEmail, roleName) => {
   email.value = targetEmail
-  password.value = 'bomberos2026_staging'
+  password.value = 'bomberos_secret_staging_2026'
 }
 
 const handleSubmit = async () => {

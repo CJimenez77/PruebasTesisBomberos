@@ -15,7 +15,7 @@ def test_create_inspeccion_and_auto_generate_alert(client):
     login_res = client.post(
         "/api/v1/auth/login",
         data={
-            "username": "matias.aguilera@alumnos.ubiobio.cl",
+            "username": "capitan@bomberoschillanviejo.cl",
             "password": "any",
         },
     )
@@ -43,7 +43,7 @@ def test_create_inspeccion_and_auto_generate_alert(client):
     assert response.status_code == 201
     data = response.json()
     assert data["tipo_nombre"] == "POST_EMERGENCIA"
-    assert data["usuario_nombre"] == "Matías Aguilera Ibarra"
+    assert "Rodrigo Silva" in data["usuario_nombre"]
 
 
 def test_list_and_resolve_alert(client):
@@ -52,7 +52,7 @@ def test_list_and_resolve_alert(client):
     login_res = client.post(
         "/api/v1/auth/login",
         data={
-            "username": "cristian.jimenez2201@alumnos.ubiobio.cl",
+            "username": "director@bomberoschillanviejo.cl",
             "password": "any",
         },
     )
@@ -81,4 +81,4 @@ def test_list_and_resolve_alert(client):
     alerta_resuelta = res_resolve.json()
     assert alerta_resuelta["resuelta"] is True
     assert alerta_resuelta["estado_nombre"] == "RESUELTA_HALLAZGO"
-    assert alerta_resuelta["usuario_resolutor_nombre"] == "Cristian Jiménez Fuentes"
+    assert "Carlos Mendoza" in alerta_resuelta["usuario_resolutor_nombre"]

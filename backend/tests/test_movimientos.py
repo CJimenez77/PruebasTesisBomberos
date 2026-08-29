@@ -26,7 +26,7 @@ def test_create_traslado_movimiento(client):
     login_res = client.post(
         "/api/v1/auth/login",
         data={
-            "username": "cristian.jimenez2201@alumnos.ubiobio.cl",
+            "username": "director@bomberoschillanviejo.cl",
             "password": "any",
         },
     )
@@ -53,7 +53,7 @@ def test_create_traslado_movimiento(client):
     assert mov["id_tipo_mov"] == 3
     assert mov["id_ubicacion_origen"] == 12
     assert mov["id_ubicacion_destino"] == 5
-    assert mov["usuario_nombre"] == "Cristian Jiménez Fuentes"
+    assert "Carlos Mendoza" in mov["usuario_nombre"]
 
 
 def test_traslado_insufficient_stock_fails(client):
@@ -61,7 +61,7 @@ def test_traslado_insufficient_stock_fails(client):
     login_res = client.post(
         "/api/v1/auth/login",
         data={
-            "username": "cristian.jimenez2201@alumnos.ubiobio.cl",
+            "username": "director@bomberoschillanviejo.cl",
             "password": "any",
         },
     )

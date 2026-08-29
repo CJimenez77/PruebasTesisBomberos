@@ -191,7 +191,7 @@
         </div>
         <h3 class="font-black text-lg text-white">Notificar Reporte Crítico al Director</h3>
         <p class="text-xs text-gray-400">
-          Se enviará un resumen de las {{ inspeccionesStore.totalAlertasPendientes }} alertas críticas activas a <strong>Cristian Jiménez Fuentes (Director)</strong>.
+          Se enviará un resumen de las {{ inspeccionesStore.totalAlertasPendientes }} alertas críticas activas a <strong>Carlos Mendoza Rivas (Director)</strong>.
         </p>
 
         <div class="p-3 rounded-xl bg-bomberos-card border border-bomberos-border text-left text-xs text-gray-300 space-y-1">
@@ -256,7 +256,7 @@ const handleResolveSubmit = async () => {
 }
 
 const sendNotification = () => {
-  alert('Notificación despachada con éxito al Director Cristian Jiménez Fuentes.')
+  alert('Notificación despachada con éxito al Director Carlos Mendoza Rivas.')
   showNotifyModal.value = false
 }
 </script>

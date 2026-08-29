@@ -11,7 +11,10 @@
         to="/movimientos"
         class="px-4 py-2.5 rounded-xl bg-bomberos-red hover:bg-bomberos-red-hover text-white text-xs font-bold shadow-lg shadow-red-950/40 transition-all flex items-center gap-2"
       >
-        <span>🔄</span> Trasladar Material
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+        </svg>
+        <span>Trasladar Material</span>
       </router-link>
     </div>
 
@@ -24,10 +27,10 @@
         :class="activeCarroId === 1 ? 'border-bomberos-red shadow-xl shadow-red-950/40 bg-bomberos-surface' : 'border-bomberos-border hover:border-gray-500'"
       >
         <div class="flex items-center justify-between mb-3">
-          <div class="w-12 h-12 rounded-2xl bg-red-950 border border-red-800/60 flex items-center justify-center text-2xl">
-            🚒
+          <div class="w-10 h-10 rounded-xl bg-red-950 border border-red-800/60 flex items-center justify-center text-red-400 font-bold">
+            B-6
           </div>
-          <span class="text-xs font-extrabold px-2.5 py-1 rounded-lg bg-emerald-950 text-emerald-400 border border-emerald-800/60">
+          <span class="text-[10px] font-extrabold px-2.5 py-1 rounded-lg bg-emerald-950 text-emerald-400 border border-emerald-800/60 uppercase">
             OPERATIVO
           </span>
         </div>
@@ -35,7 +38,7 @@
         <p class="text-xs text-gray-400 mt-1">Unidad de agua y ataque de primera intervención (Renault Camiva).</p>
         <div class="mt-4 pt-3 border-t border-bomberos-border/60 flex items-center justify-between text-xs">
           <span class="text-gray-400">5 Cortinas / Gavetas</span>
-          <span class="font-bold text-red-400">Ver inventario →</span>
+          <span class="font-bold text-red-400">Ver inventario</span>
         </div>
       </div>
 
@@ -46,10 +49,10 @@
         :class="activeCarroId === 2 ? 'border-bomberos-red shadow-xl shadow-red-950/40 bg-bomberos-surface' : 'border-bomberos-border hover:border-gray-500'"
       >
         <div class="flex items-center justify-between mb-3">
-          <div class="w-12 h-12 rounded-2xl bg-red-950 border border-red-800/60 flex items-center justify-center text-2xl">
-            🚑
+          <div class="w-10 h-10 rounded-xl bg-red-950 border border-red-800/60 flex items-center justify-center text-red-400 font-bold">
+            R-6
           </div>
-          <span class="text-xs font-extrabold px-2.5 py-1 rounded-lg bg-emerald-950 text-emerald-400 border border-emerald-800/60">
+          <span class="text-[10px] font-extrabold px-2.5 py-1 rounded-lg bg-emerald-950 text-emerald-400 border border-emerald-800/60 uppercase">
             OPERATIVO
           </span>
         </div>
@@ -57,7 +60,7 @@
         <p class="text-xs text-gray-400 mt-1">Rescate vehicular, extricación pesada y cuerdas.</p>
         <div class="mt-4 pt-3 border-t border-bomberos-border/60 flex items-center justify-between text-xs">
           <span class="text-gray-400">4 Compartimentos</span>
-          <span class="font-bold text-red-400">Ver inventario →</span>
+          <span class="font-bold text-red-400">Ver inventario</span>
         </div>
       </div>
 
@@ -68,10 +71,10 @@
         :class="activeCarroId === 3 ? 'border-bomberos-red shadow-xl shadow-red-950/40 bg-bomberos-surface' : 'border-bomberos-border hover:border-gray-500'"
       >
         <div class="flex items-center justify-between mb-3">
-          <div class="w-12 h-12 rounded-2xl bg-amber-950 border border-amber-800/60 flex items-center justify-center text-2xl">
-            🏢
+          <div class="w-10 h-10 rounded-xl bg-blue-950 border border-blue-800/60 flex items-center justify-center text-blue-400 font-bold">
+            BOD
           </div>
-          <span class="text-xs font-extrabold px-2.5 py-1 rounded-lg bg-blue-950 text-blue-400 border border-blue-800/60">
+          <span class="text-[10px] font-extrabold px-2.5 py-1 rounded-lg bg-blue-950 text-blue-400 border border-blue-800/60 uppercase">
             CENTRAL
           </span>
         </div>
@@ -79,7 +82,7 @@
         <p class="text-xs text-gray-400 mt-1">Stock de reserva, insumos médicos y pañol de repuestos.</p>
         <div class="mt-4 pt-3 border-t border-bomberos-border/60 flex items-center justify-between text-xs">
           <span class="text-gray-400">3 Estantes / Pañol</span>
-          <span class="font-bold text-red-400">Ver inventario →</span>
+          <span class="font-bold text-red-400">Ver inventario</span>
         </div>
       </div>
     </div>
@@ -88,7 +91,7 @@
     <div class="bg-bomberos-surface border border-bomberos-border rounded-3xl p-6 shadow-xl space-y-4">
       <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-bomberos-border pb-4">
         <div>
-          <span class="text-xs font-bold text-bomberos-gold uppercase tracking-wider">Inventario en Vivo</span>
+          <span class="text-xs font-bold text-gray-400 uppercase tracking-wider">Inventario en Vivo</span>
           <h2 class="text-xl font-black text-white">{{ activeCarroName }}</h2>
         </div>
         <div class="text-xs text-gray-400 bg-bomberos-card px-3 py-1.5 rounded-xl border border-bomberos-border">
@@ -130,8 +133,8 @@
           </thead>
           <tbody class="divide-y divide-bomberos-border/40">
             <tr v-for="stk in stockList" :key="stk.id_item + '-' + stk.id_ubicacion" class="hover:bg-white/5 transition-colors">
-              <td class="px-4 py-3 font-bold text-gray-100 flex items-center gap-2">
-                <span>📦</span> {{ stk.item_nombre }}
+              <td class="px-4 py-3 font-bold text-gray-100">
+                {{ stk.item_nombre }}
               </td>
               <td class="px-4 py-3 text-gray-400">{{ stk.ubicacion_nombre }}</td>
               <td class="px-4 py-3 text-right font-extrabold text-white">{{ stk.cantidad_asignada }} unidades</td>

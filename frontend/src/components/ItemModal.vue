@@ -1,13 +1,15 @@
 <template>
-  <div v-if="isOpen" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm">
+  <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
     <div class="bg-bomberos-surface border border-bomberos-border rounded-2xl w-full max-w-lg overflow-hidden shadow-2xl animate-in fade-in zoom-in-95 duration-150">
       <!-- Header -->
       <div class="p-5 border-b border-bomberos-border bg-bomberos-card flex items-center justify-between">
         <div class="flex items-center gap-2.5">
-          <span class="text-xl">➕</span>
-          <h3 class="font-bold text-lg text-gray-100">Registrar Nuevo Bien en Inventario</h3>
+          <svg class="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+          </svg>
+          <h3 class="font-bold text-base text-gray-100">Registrar Nuevo Bien en Inventario</h3>
         </div>
-        <button @click="$emit('close')" class="text-gray-400 hover:text-white text-xl font-bold p-1">
+        <button @click="$emit('close')" class="text-gray-400 hover:text-white text-base font-bold p-1">
           ✕
         </button>
       </div>
@@ -72,8 +74,8 @@
               required
               class="w-full bg-bomberos-card border border-bomberos-border rounded-xl px-3 py-2.5 text-sm text-gray-100 focus:outline-none focus:border-bomberos-red"
             >
-              <option :value="1">📦 Agrupable (Lote / Conteo)</option>
-              <option :value="2">📱 Unitario (Etiqueta QR)</option>
+              <option :value="1">Agrupable (Lote / Conteo)</option>
+              <option :value="2">Unitario (Etiqueta QR)</option>
             </select>
           </div>
         </div>
@@ -145,7 +147,7 @@
           <button
             type="submit"
             :disabled="loading"
-            class="px-5 py-2.5 rounded-xl bg-bomberos-red hover:bg-bomberos-red-hover text-white text-sm font-bold shadow-lg shadow-red-950/40 transition-all disabled:opacity-50"
+            class="px-5 py-2.5 rounded-xl bg-bomberos-red hover:bg-bomberos-red-hover text-white text-sm font-bold shadow-lg shadow-red-950/40 transition-all disabled:opacity-50 uppercase tracking-wide"
           >
             {{ loading ? 'Guardando...' : 'Registrar Ítem' }}
           </button>
@@ -159,11 +161,7 @@
 import { reactive, ref, watch } from 'vue'
 import { useCatalogoStore } from '../stores/catalogo'
 
-const props = defineProps({
-  isOpen: Boolean
-})
-
-const emit = defineEmits(['close', 'saved'])
+const emit = defineEmits(['close', 'created'])
 const catalogoStore = useCatalogoStore()
 const loading = ref(false)
 const errorMsg = ref(null)
@@ -172,8 +170,8 @@ const form = reactive({
   nombre: '',
   descripcion: '',
   codigo_qr: '',
-  id_categoria: 2, // Herramientas menores por defecto
-  id_tipo_item: 1, // Agrupable por defecto
+  id_categoria: 2,
+  id_tipo_item: 1,
   cantidad: 1,
   estado: 'OPERATIVO',
 })
@@ -213,7 +211,7 @@ const handleSubmit = async () => {
   loading.value = false
 
   if (result.success) {
-    emit('saved')
+    emit('created')
     emit('close')
   } else {
     errorMsg.value = result.error

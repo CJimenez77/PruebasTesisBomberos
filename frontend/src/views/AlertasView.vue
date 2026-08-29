@@ -13,7 +13,10 @@
           @click="showNotifyModal = true"
           class="px-4 py-2.5 rounded-xl bg-amber-600 hover:bg-amber-500 text-white text-xs font-bold shadow-lg shadow-amber-950/40 transition-all flex items-center gap-2"
         >
-          <span>📢</span> Notificar al Director ({{ inspeccionesStore.totalAlertasPendientes }})
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>
+          </svg>
+          <span>Notificar al Director ({{ inspeccionesStore.totalAlertasPendientes }})</span>
         </button>
       </div>
     </div>
@@ -21,7 +24,7 @@
     <!-- Stats Summary Cards -->
     <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
       <div class="bg-bomberos-card border border-bomberos-border p-4 rounded-2xl">
-        <span class="text-xs font-bold text-gray-400 uppercase">Total Alertas</span>
+        <span class="text-xs font-bold text-gray-400 uppercase">Total Alertas Registradas</span>
         <div class="text-2xl font-black text-white mt-1">{{ inspeccionesStore.alertas.length }}</div>
       </div>
       <div class="bg-red-950/30 border border-red-800/60 p-4 rounded-2xl">
@@ -61,7 +64,6 @@
 
     <!-- Alerts List -->
     <div v-if="filteredAlertas.length === 0" class="bg-bomberos-surface border border-bomberos-border rounded-3xl p-12 text-center">
-      <div class="text-4xl mb-2">🛡️</div>
       <h3 class="text-base font-bold text-white">No hay alertas en esta sección</h3>
       <p class="text-xs text-gray-400 mt-1">El inventario físico coincide plenamente con los registros contables.</p>
     </div>
@@ -85,7 +87,7 @@
               v-else
               class="px-2.5 py-1 rounded-lg bg-emerald-950 text-emerald-400 border border-emerald-800 font-extrabold text-[11px] uppercase"
             >
-              ✓ {{ alerta.estado_nombre }}
+              RESUELTA: {{ alerta.estado_nombre }}
             </span>
 
             <span class="text-xs text-gray-400 font-mono">ID Alerta #{{ alerta.id_alerta }}</span>
@@ -108,7 +110,7 @@
             <p class="font-bold text-gray-400 mb-0.5">Observaciones de Inspección:</p>
             <p>{{ alerta.observaciones }}</p>
             <div v-if="alerta.resuelta" class="mt-2 pt-2 border-t border-bomberos-border text-[11px] text-emerald-400">
-              ✓ Visado por: <strong>{{ alerta.usuario_resolutor_nombre }}</strong>
+              Visado por: <strong>{{ alerta.usuario_resolutor_nombre }}</strong>
             </div>
           </div>
         </div>
@@ -118,9 +120,9 @@
           <button
             v-if="!alerta.resuelta"
             @click="openResolveModal(alerta)"
-            class="px-4 py-2.5 rounded-xl bg-bomberos-red hover:bg-bomberos-red-hover text-white text-xs font-bold shadow-lg shadow-red-950/40 transition-all text-center"
+            class="px-4 py-2.5 rounded-xl bg-bomberos-red hover:bg-bomberos-red-hover text-white text-xs font-bold shadow-lg shadow-red-950/40 transition-all text-center uppercase tracking-wide"
           >
-            ⭐ Visar y Resolver Discrepancia
+            Visar y Resolver Discrepancia
           </button>
         </div>
       </div>
@@ -171,7 +173,7 @@
           <button
             type="button"
             @click="handleResolveSubmit"
-            class="px-5 py-2 rounded-xl bg-bomberos-red hover:bg-bomberos-red-hover text-white text-xs font-bold shadow-lg"
+            class="px-5 py-2 rounded-xl bg-bomberos-red hover:bg-bomberos-red-hover text-white text-xs font-bold shadow-lg uppercase"
           >
             Confirmar Cierre de Alerta
           </button>
@@ -182,8 +184,10 @@
     <!-- Modal de Notificación al Director -->
     <div v-if="showNotifyModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
       <div class="bg-bomberos-surface border border-bomberos-border rounded-3xl w-full max-w-md overflow-hidden shadow-2xl p-6 space-y-4 text-center">
-        <div class="w-12 h-12 rounded-2xl bg-amber-950 text-amber-400 border border-amber-800/60 mx-auto flex items-center justify-center text-2xl">
-          📢
+        <div class="w-12 h-12 rounded-2xl bg-amber-950 text-amber-400 border border-amber-800/60 mx-auto flex items-center justify-center font-bold">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>
+          </svg>
         </div>
         <h3 class="font-black text-lg text-white">Notificar Reporte Crítico al Director</h3>
         <p class="text-xs text-gray-400">
@@ -192,16 +196,16 @@
 
         <div class="p-3 rounded-xl bg-bomberos-card border border-bomberos-border text-left text-xs text-gray-300 space-y-1">
           <div class="flex items-center gap-2">
-            <span class="text-emerald-400">✓</span> Correo Institucional: <code>director@bomberoschillanviejo.cl</code>
+            <span class="text-emerald-400 font-bold">•</span> Correo Institucional: <code>director@bomberoschillanviejo.cl</code>
           </div>
           <div class="flex items-center gap-2">
-            <span class="text-emerald-400">✓</span> Notificación Push en App Móvil
+            <span class="text-emerald-400 font-bold">•</span> Notificación Push en App Móvil
           </div>
         </div>
 
         <button
           @click="sendNotification"
-          class="w-full py-3 bg-amber-600 hover:bg-amber-500 text-white font-bold text-xs rounded-xl shadow-lg transition-all"
+          class="w-full py-3 bg-amber-600 hover:bg-amber-500 text-white font-bold text-xs rounded-xl shadow-lg transition-all uppercase tracking-wider"
         >
           Confirmar y Despachar Notificación
         </button>
@@ -252,7 +256,7 @@ const handleResolveSubmit = async () => {
 }
 
 const sendNotification = () => {
-  alert('¡Notificación despachada con éxito al Director Cristian Jiménez Fuentes!')
+  alert('Notificación despachada con éxito al Director Cristian Jiménez Fuentes.')
   showNotifyModal.value = false
 }
 </script>

@@ -1,43 +1,48 @@
 <template>
-  <div class="min-h-screen bg-bomberos-bg flex items-center justify-center p-4">
-    <div class="w-full max-w-md bg-bomberos-surface border border-bomberos-border rounded-3xl p-8 shadow-2xl relative overflow-hidden">
-      <!-- Top banner accent -->
-      <div class="absolute top-0 left-0 right-0 h-2 bg-gradient-to-r from-bomberos-sidebar via-bomberos-red to-bomberos-gold"></div>
+  <div class="min-h-screen flex items-center justify-center bg-bomberos-bg p-4">
+    <div class="w-full max-w-xl bg-bomberos-surface border border-bomberos-border rounded-3xl p-8 shadow-2xl space-y-6 relative overflow-hidden">
+      <!-- Institutional Top Bar -->
+      <div class="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-bomberos-red via-bomberos-red-hover to-bomberos-red"></div>
 
-      <!-- Header / Logo -->
-      <div class="text-center mb-8">
-        <div class="w-16 h-16 rounded-2xl bg-bomberos-red mx-auto flex items-center justify-center text-3xl shadow-xl shadow-red-950/50 mb-3 border border-red-500/30">
-          🚒
+      <!-- Institutional Logo & Header -->
+      <div class="text-center space-y-2">
+        <div class="w-16 h-16 rounded-2xl bg-bomberos-red text-white mx-auto flex items-center justify-center shadow-lg">
+          <svg class="w-9 h-9" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+          </svg>
         </div>
-        <h1 class="text-2xl font-extrabold text-white tracking-tight">Sexta Compañía</h1>
-        <p class="text-xs text-gray-400 font-medium mt-1">Cuerpo de Bomberos de Chillán Viejo</p>
-        <div class="inline-block mt-2 px-3 py-1 rounded-full bg-red-950/60 border border-red-800/40 text-[11px] font-bold text-red-300">
-          Módulo de Inventario & Trazabilidad
+        <h1 class="text-2xl font-black tracking-tight text-white uppercase">Sexta Compañía</h1>
+        <p class="text-xs text-gray-400 font-medium tracking-wide">Cuerpo de Bomberos de Chillán Viejo</p>
+        <div class="inline-block px-3 py-1 rounded-full bg-bomberos-card border border-bomberos-border text-[11px] font-semibold text-gray-300">
+          Sistema Integrado de Control de Inventario y Trazabilidad
         </div>
       </div>
 
       <!-- Error Alert -->
-      <div v-if="authStore.error" class="mb-5 p-3 rounded-xl bg-red-950/80 border border-red-800 text-red-200 text-xs flex items-center gap-2">
-        <span>⚠️</span> {{ authStore.error }}
+      <div v-if="error" class="p-3.5 rounded-xl bg-red-950/80 border border-red-800 text-xs text-red-200 flex items-center gap-2">
+        <svg class="w-4 h-4 shrink-0 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+        </svg>
+        <span>{{ error }}</span>
       </div>
 
-      <!-- Form -->
-      <form @submit.prevent="handleLogin" class="space-y-4">
+      <!-- Login Form -->
+      <form @submit.prevent="handleSubmit" class="space-y-4">
         <div>
-          <label class="block text-xs font-bold text-gray-300 uppercase tracking-wider mb-1.5">
+          <label class="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-1.5">
             Correo Institucional / RUN
           </label>
           <input
             v-model="email"
             type="text"
             required
-            placeholder="cristian.jimenez2201@alumnos.ubiobio.cl"
-            class="w-full bg-bomberos-card border border-bomberos-border rounded-xl px-4 py-3 text-sm text-gray-100 placeholder-gray-500 focus:outline-none focus:border-bomberos-red focus:ring-1 focus:ring-bomberos-red transition-all"
+            placeholder="usuario@bomberoschillanviejo.cl"
+            class="w-full bg-bomberos-card border border-bomberos-border focus:border-bomberos-red rounded-xl px-4 py-3 text-sm text-white placeholder-gray-500 focus:outline-none transition-all"
           />
         </div>
 
         <div>
-          <label class="block text-xs font-bold text-gray-300 uppercase tracking-wider mb-1.5">
+          <label class="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-1.5">
             Contraseña
           </label>
           <input
@@ -45,39 +50,104 @@
             type="password"
             required
             placeholder="••••••••••••"
-            class="w-full bg-bomberos-card border border-bomberos-border rounded-xl px-4 py-3 text-sm text-gray-100 placeholder-gray-500 focus:outline-none focus:border-bomberos-red focus:ring-1 focus:ring-bomberos-red transition-all"
+            class="w-full bg-bomberos-card border border-bomberos-border focus:border-bomberos-red rounded-xl px-4 py-3 text-sm text-white placeholder-gray-500 focus:outline-none transition-all"
           />
         </div>
 
         <button
           type="submit"
-          :disabled="authStore.loading"
-          class="w-full py-3.5 px-4 bg-bomberos-red hover:bg-bomberos-red-hover active:scale-[0.99] text-white font-bold text-sm rounded-xl shadow-xl shadow-red-950/60 transition-all duration-150 flex items-center justify-center gap-2 mt-2 disabled:opacity-50"
+          :disabled="loading"
+          class="w-full bg-bomberos-red hover:bg-bomberos-red-hover text-white font-bold py-3.5 px-4 rounded-xl shadow-lg shadow-red-950/50 transition-all duration-150 disabled:opacity-50 text-sm tracking-wide uppercase flex items-center justify-center gap-2"
         >
-          <span v-if="authStore.loading" class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
-          <span>{{ authStore.loading ? 'Validando Acceso...' : 'Ingresar al Portal' }}</span>
+          <span v-if="loading">Verificando Credenciales...</span>
+          <span v-else>Ingresar al Portal Institucional</span>
         </button>
       </form>
 
-      <!-- Quick Credentials / Staging Help -->
-      <div class="mt-8 pt-5 border-t border-bomberos-border/60">
-        <p class="text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-2 text-center">
-          Credenciales Rápidas de Prueba (Staging)
-        </p>
-        <div class="grid grid-cols-2 gap-2">
+      <!-- Functional Profiles Selector -->
+      <div class="pt-4 border-t border-bomberos-border/60 space-y-3">
+        <div class="flex items-center justify-between">
+          <span class="text-[11px] font-extrabold uppercase tracking-wider text-gray-400">
+            Acceso Rápido por Funcionalidad Operativa
+          </span>
+          <span class="text-[10px] text-gray-500 font-mono">Entorno Staging</span>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+          <!-- Perfil 1: Resolución de Alertas & Mando -->
           <button
             type="button"
-            @click="setDirector"
-            class="p-2 rounded-xl bg-bomberos-card hover:bg-bomberos-border/60 border border-bomberos-border text-[11px] text-gray-300 font-semibold transition-all text-left"
+            @click="setQuickProfile('cristian.jimenez2201@alumnos.ubiobio.cl', 'DIRECTOR')"
+            class="text-left p-3 rounded-xl bg-bomberos-card border border-bomberos-border hover:border-bomberos-red transition-all group"
           >
-            ⭐ <span class="text-amber-400 font-bold">Director</span> (Cristian)
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-bold text-white group-hover:text-red-400 transition-colors">
+                Mando & Resolución de Alertas
+              </span>
+              <span class="text-[10px] font-extrabold px-1.5 py-0.5 rounded bg-red-950 text-red-400 border border-red-800">
+                DIRECTOR
+              </span>
+            </div>
+            <p class="text-[11px] text-gray-400 mt-1 leading-tight">
+              Visación y cierre formal de discrepancias patrimoniales y reportes de mando.
+            </p>
           </button>
+
+          <!-- Perfil 2: Inspección Terreno Post-Emergencia -->
           <button
             type="button"
-            @click="setCapitan"
-            class="p-2 rounded-xl bg-bomberos-card hover:bg-bomberos-border/60 border border-bomberos-border text-[11px] text-gray-300 font-semibold transition-all text-left"
+            @click="setQuickProfile('matias.aguilera@alumnos.ubiobio.cl', 'CAPITAN')"
+            class="text-left p-3 rounded-xl bg-bomberos-card border border-bomberos-border hover:border-bomberos-red transition-all group"
           >
-            🚒 <span class="text-red-400 font-bold">Capitán</span> (Matías)
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-bold text-white group-hover:text-red-400 transition-colors">
+                Inspecciones Post-Emergencia
+              </span>
+              <span class="text-[10px] font-extrabold px-1.5 py-0.5 rounded bg-red-950 text-red-400 border border-red-800">
+                CAPITÁN
+              </span>
+            </div>
+            <p class="text-[11px] text-gray-400 mt-1 leading-tight">
+              Recuento en terreno tras retorno de siniestros y auditoría de carros bomba.
+            </p>
+          </button>
+
+          <!-- Perfil 3: Altas, Bajas & Recepción de Material -->
+          <button
+            type="button"
+            @click="setQuickProfile('teniente1@bomberoschillanviejo.cl', 'TENIENTE')"
+            class="text-left p-3 rounded-xl bg-bomberos-card border border-bomberos-border hover:border-bomberos-red transition-all group"
+          >
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-bold text-white group-hover:text-red-400 transition-colors">
+                Altas, Bajas & Recepción
+              </span>
+              <span class="text-[10px] font-extrabold px-1.5 py-0.5 rounded bg-amber-950 text-amber-400 border border-amber-800">
+                TENIENTE
+              </span>
+            </div>
+            <p class="text-[11px] text-gray-400 mt-1 leading-tight">
+              Incorporación de compras/donaciones y tramitación de bajas por deterioro.
+            </p>
+          </button>
+
+          <!-- Perfil 4: Trazabilidad & Movimientos entre Unidades -->
+          <button
+            type="button"
+            @click="setQuickProfile('inventario@bomberoschillanviejo.cl', 'ENCARGADO_INVENTARIO')"
+            class="text-left p-3 rounded-xl bg-bomberos-card border border-bomberos-border hover:border-bomberos-red transition-all group"
+          >
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-bold text-white group-hover:text-red-400 transition-colors">
+                Trazabilidad & Traslados
+              </span>
+              <span class="text-[10px] font-extrabold px-1.5 py-0.5 rounded bg-blue-950 text-blue-400 border border-blue-800">
+                ENCARGADO
+              </span>
+            </div>
+            <p class="text-[11px] text-gray-400 mt-1 leading-tight">
+              Movimientos de stock entre Bodega Central, Carro B-6 y Unidad R-6.
+            </p>
           </button>
         </div>
       </div>
@@ -90,26 +160,33 @@ import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
 
+const email = ref('cristian.jimenez2201@alumnos.ubiobio.cl')
+const password = ref('bomberos2026_staging')
+const loading = ref(false)
+const error = ref('')
+
 const authStore = useAuthStore()
 const router = useRouter()
 
-const email = ref('cristian.jimenez2201@alumnos.ubiobio.cl')
-const password = ref('bomberos2026')
-
-const setDirector = () => {
-  email.value = 'cristian.jimenez2201@alumnos.ubiobio.cl'
-  password.value = 'director2026'
+const setQuickProfile = (targetEmail, roleName) => {
+  email.value = targetEmail
+  password.value = 'bomberos2026_staging'
 }
 
-const setCapitan = () => {
-  email.value = 'matias.aguilera@alumnos.ubiobio.cl'
-  password.value = 'capitan2026'
-}
-
-const handleLogin = async () => {
-  const success = await authStore.login(email.value, password.value)
-  if (success) {
-    router.push('/')
+const handleSubmit = async () => {
+  loading.value = true
+  error.value = ''
+  try {
+    const success = await authStore.login(email.value, password.value)
+    if (success) {
+      router.push('/')
+    } else {
+      error.value = authStore.error || 'Error al iniciar sesión. Verifique sus credenciales.'
+    }
+  } catch (err) {
+    error.value = 'No se pudo conectar con el servidor de autenticación.'
+  } finally {
+    loading.value = false
   }
 }
 </script>

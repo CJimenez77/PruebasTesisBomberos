@@ -9,7 +9,10 @@
 
       <div class="flex items-center gap-2">
         <span class="text-xs px-3 py-1.5 rounded-xl bg-amber-950/80 border border-amber-800/60 text-amber-300 font-bold flex items-center gap-1.5">
-          <span>⚠️</span> Detección Automática de Discrepancias
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+          </svg>
+          <span>Detección Automática de Discrepancias</span>
         </span>
       </div>
     </div>
@@ -129,7 +132,7 @@
                 v-else
                 class="text-xs font-bold text-emerald-400 bg-emerald-950/90 border border-emerald-800 px-2.5 py-1 rounded-lg block"
               >
-                ✓ Conforme
+                Conforme
               </span>
             </div>
           </div>
@@ -140,19 +143,22 @@
       <div class="pt-4 border-t border-bomberos-border flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div class="text-xs text-gray-400">
           <span v-if="hasDiscrepancies" class="text-red-400 font-bold">
-            ⚠️ Se generará automáticamente una ALERTA DE DISCREPANCIA para el Capitán y Director.
+            Atención: Se generará automáticamente una ALERTA DE DISCREPANCIA para el Capitán y Director.
           </span>
           <span v-else class="text-emerald-400 font-bold">
-            ✓ Todo el material coincide con el saldo de inventario.
+            Todo el material coincide con el saldo de inventario.
           </span>
         </div>
 
         <button
           @click="saveInspection"
           :disabled="isSubmitting || itemsChecklist.length === 0"
-          class="px-6 py-3 rounded-xl bg-bomberos-red hover:bg-bomberos-red-hover text-white text-sm font-bold shadow-xl shadow-red-950/50 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+          class="px-6 py-3 rounded-xl bg-bomberos-red hover:bg-bomberos-red-hover text-white text-sm font-bold shadow-xl shadow-red-950/50 transition-all flex items-center justify-center gap-2 disabled:opacity-50 uppercase tracking-wide"
         >
-          <span>💾</span> {{ isSubmitting ? 'Guardando...' : 'Registrar y Finalizar Inspección' }}
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"></path>
+          </svg>
+          <span>{{ isSubmitting ? 'Guardando...' : 'Registrar y Finalizar Inspección' }}</span>
         </button>
       </div>
     </div>
@@ -172,8 +178,8 @@ const inspeccionesStore = useInspeccionesStore()
 const ubicacionesStore = useUbicacionesStore()
 const router = useRouter()
 
-const selectedUnidadId = ref(1) // B-6 por defecto
-const tipoInspeccionId = ref(2) // POST_EMERGENCIA
+const selectedUnidadId = ref(1)
+const tipoInspeccionId = ref(2)
 const itemsChecklist = ref([])
 const loadingItems = ref(false)
 const isSubmitting = ref(false)
@@ -230,7 +236,7 @@ const saveInspection = async () => {
   isSubmitting.value = false
 
   if (res.success) {
-    alert('¡Inspección registrada con éxito! Si hubo discrepancias, la alerta fue generada automáticamente.')
+    alert('Inspección registrada con éxito. Si hubo discrepancias, la alerta fue generada automáticamente.')
     router.push('/alertas')
   } else {
     alert(res.error)

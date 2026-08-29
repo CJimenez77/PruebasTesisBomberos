@@ -1,0 +1,18 @@
+[project]
+name = "bomberos-inventario-backend"
+version = "1.0.0"
+requires-python = ">=3.12"
+
+[tool.ruff]
+line-length = 120
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP"]
+ignore = [
+    "B008",  # Permitir FastAPI Depends() en parámetros de funciones
+    "BLE001", # Permitir manejo general de excepciones en healthcheck/lifespan
+]
+
+[tool.ruff.lint.isort]
+combine-as-imports = true

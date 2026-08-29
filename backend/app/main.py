@@ -1,10 +1,11 @@
-import os
 from contextlib import asynccontextmanager
-from fastapi import FastAPI, Depends, HTTPException
+
+from fastapi import Depends, FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from sqlalchemy.orm import Session
 from sqlalchemy import text
-from app.database import get_db, engine
+from sqlalchemy.orm import Session
+
+from app.database import engine, get_db
 
 # Script DDL integrado del MER v3 para inicializacion automatica
 DDL_MER_V3 = """
@@ -160,6 +161,7 @@ INSERT INTO ESTADO_ALERTA (nombre, descripcion) VALUES
 ON CONFLICT (nombre) DO NOTHING;
 """
 
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # Ejecutar DDL al iniciar para asegurar que la base de datos este inicializada
@@ -172,13 +174,14 @@ async def lifespan(app: FastAPI):
         print(f"Aviso inicializando BD: {e}")
     yield
 
+
 app = FastAPI(
     title="Sistema de Gestión de Inventarios - Bomberos 6ta Compañía",
     description="API REST de Staging para el Módulo de Inventarios (Proyecto de Título UBB - Cristian Jiménez & Matías Aguilera)",
     version="1.0.0",
     docs_url="/docs",
     redoc_url="/redoc",
-    lifespan=lifespan
+    lifespan=lifespan,
 )
 
 # CORS habilitado para desarrollo y pruebas móviles
@@ -190,6 +193,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+
 @app.get("/", tags=["General"])
 def root():
     return {
@@ -197,8 +201,9 @@ def root():
         "estado": "Operativo",
         "ambiente": "Staging (Cloud)",
         "documentacion": "/docs",
-        "autores": ["Cristian Jiménez", "Matías Aguilera"]
+        "autores": ["Cristian Jiménez", "Matías Aguilera"],
     }
+
 
 @app.get("/api/v1/health", tags=["Salud & Diagnóstico"])
 def health_check(db: Session = Depends(get_db)):
@@ -206,23 +211,22 @@ def health_check(db: Session = Depends(get_db)):
         db.execute(text("SELECT 1"))
         roles_count = db.execute(text("SELECT COUNT(*) FROM ROL")).scalar()
         categorias_count = db.execute(text("SELECT COUNT(*) FROM CATEGORIA_ITEM")).scalar()
-        
+
         return {
             "status": "HEALTHY",
             "database": "CONNECTED",
             "engine": "PostgreSQL 16",
-            "seed_data": {
-                "roles_cargados": roles_count,
-                "categorias_cargadas": categorias_count
-            }
+            "seed_data": {"roles_cargados": roles_count, "categorias_cargadas": categorias_count},
         }
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error conectando a la base de datos: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Error conectando a la base de datos: {e!s}")
+
 
 @app.get("/api/v1/inventario/categorias", tags=["Catálogo"])
 def listar_categorias(db: Session = Depends(get_db)):
     result = db.execute(text("SELECT id_categoria, nombre FROM CATEGORIA_ITEM ORDER BY id_categoria")).fetchall()
     return [{"id_categoria": row[0], "nombre": row[1]} for row in result]
+
 
 @app.get("/api/v1/inventario/tipos-movimiento", tags=["Trazabilidad"])
 def listar_tipos_movimiento(db: Session = Depends(get_db)):

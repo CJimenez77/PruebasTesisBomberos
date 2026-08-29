@@ -1,7 +1,9 @@
 from fastapi.testclient import TestClient
+
 from app.main import app
 
 client = TestClient(app)
+
 
 def test_root_endpoint():
     """Valida el endpoint raiz y metadatos del proyecto"""
@@ -11,6 +13,7 @@ def test_root_endpoint():
     assert data["sistema"] == "Módulo de Gestión de Inventarios - Sexta Compañía de Bomberos"
     assert data["estado"] == "Operativo"
     assert "Cristian Jiménez" in data["autores"]
+
 
 def test_health_check_endpoint():
     """Valida la conexion con la base de datos PostgreSQL y carga de datos semilla"""
@@ -23,6 +26,7 @@ def test_health_check_endpoint():
     assert data["seed_data"]["roles_cargados"] >= 6
     assert data["seed_data"]["categorias_cargadas"] >= 7
 
+
 def test_listar_categorias():
     """Valida que el catalogo retorne las categorias institucionales oficiales"""
     response = client.get("/api/v1/inventario/categorias")
@@ -34,6 +38,7 @@ def test_listar_categorias():
     assert "Herramientas Menores" in nombres
     assert "Equipos de Proteccion Personal (EPP)" in nombres
     assert "Vehiculos y Material Mayor" in nombres
+
 
 def test_listar_tipos_movimiento():
     """Valida que los tipos de movimiento maestro de trazabilidad esten cargados"""

@@ -1,0 +1,25 @@
+{
+  "name": "modulo-inventario-bomberos",
+  "version": "1.0.0",
+  "framework": "gentle-ai",
+  "methodology": "Spec-Driven Development (SDD)",
+  "memory": {
+    "provider": "engram",
+    "storage": "sqlite3",
+    "context_scope": "project",
+    "persist_decisions": true
+  },
+  "specs_directory": "specs",
+  "harnesses": {
+    "strict_typing": true,
+    "require_tests": true,
+    "linting": "ruff",
+    "test_runner": "pytest"
+  },
+  "stack": {
+    "backend": "FastAPI (Python 3.12)",
+    "database": "PostgreSQL 16 + SQLAlchemy 2.0",
+    "frontend": "Vue.js 3 + Vite",
+    "deployment": "Docker Compose / Render Cloud Staging"
+  }
+}

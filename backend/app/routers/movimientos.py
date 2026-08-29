@@ -133,11 +133,10 @@ def create_movimiento(
         )
 
     # 3. Registrar el movimiento en el Ledger inmutable
-    res = db.execute(
+    db.execute(
         text("""
             INSERT INTO MOVIMIENTO (cantidad, id_tipo_mov, id_item, id_usuario, id_ubicacion_origen, id_ubicacion_destino, observaciones, fecha)
             VALUES (:cantidad, :id_tipo_mov, :id_item, :id_usuario, :id_origen, :id_destino, :obs, NOW())
-            RETURNING id_movimiento
         """),
         {
             "cantidad": mov_in.cantidad,
@@ -149,7 +148,6 @@ def create_movimiento(
             "obs": mov_in.observaciones,
         },
     )
-    new_id = res.scalar()
     db.commit()
 
     # Retornar el movimiento con sus nombres relacionados

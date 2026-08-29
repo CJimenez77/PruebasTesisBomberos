@@ -17,3 +17,8 @@ ignore = [
 
 [tool.ruff.lint.isort]
 combine-as-imports = true
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["tests"]
+addopts = "-v"

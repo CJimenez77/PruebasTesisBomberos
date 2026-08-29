@@ -177,7 +177,10 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(
     title="Sistema de Gestión de Inventarios - Bomberos 6ta Compañía",
-    description="API REST de Staging para el Módulo de Inventarios (Proyecto de Título UBB - Cristian Jiménez & Matías Aguilera)",
+    description=(
+        "API REST de Staging para el Módulo de Inventarios "
+        "(Proyecto de Título UBB - Cristian Jiménez & Matías Aguilera)"
+    ),
     version="1.0.0",
     docs_url="/docs",
     redoc_url="/redoc",
@@ -219,7 +222,10 @@ def health_check(db: Session = Depends(get_db)):
             "seed_data": {"roles_cargados": roles_count, "categorias_cargadas": categorias_count},
         }
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error conectando a la base de datos: {e!s}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Error conectando a la base de datos: {e!s}",
+        ) from e
 
 
 @app.get("/api/v1/inventario/categorias", tags=["Catálogo"])

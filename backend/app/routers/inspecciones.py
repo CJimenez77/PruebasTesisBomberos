@@ -18,6 +18,92 @@ from app.schemas.inspeccion import (
 router = APIRouter(prefix="/inspecciones", tags=["Inspecciones & Alertas de Discrepancia"])
 
 
+def fetch_inspeccion_by_id(id_inspeccion: int, db: Session) -> dict | None:
+    query = """
+        SELECT i.id_inspeccion, i.id_tipo_inspeccion, ti.nombre as tipo_nombre,
+               i.id_usuario, u.nombre as usuario_nombre,
+               i.id_ubicacion, ub.nombre as ubicacion_nombre, i.fecha
+        FROM INSPECCION i
+        JOIN TIPO_INSPECCION ti ON i.id_tipo_inspeccion = ti.id_tipo_inspeccion
+        JOIN USUARIO u ON i.id_usuario = u.id_usuario
+        JOIN UBICACION ub ON i.id_ubicacion = ub.id_ubicacion
+        WHERE i.id_inspeccion = :id_ins
+    """
+    ins = db.execute(text(query), {"id_ins": id_inspeccion}).fetchone()
+    if not ins:
+        return None
+
+    detalles_rows = db.execute(
+        text("""
+            SELECT d.id_detalle, d.id_item, it.nombre as item_nombre,
+                   d.cantidad_encontrada, d.cantidad_teorica_actual, d.estado_reportado
+            FROM DETALLE_INSPECCION d
+            JOIN ITEM it ON d.id_item = it.id_item
+            WHERE d.id_inspeccion = :id_ins
+        """),
+        {"id_ins": id_inspeccion},
+    ).fetchall()
+
+    detalles = [
+        {
+            "id_detalle": d[0],
+            "id_item": d[1],
+            "item_nombre": d[2],
+            "cantidad_encontrada": d[3],
+            "cantidad_teorica_actual": d[4],
+            "estado_reportado": d[5],
+        }
+        for d in detalles_rows
+    ]
+
+    return {
+        "id_inspeccion": ins[0],
+        "id_tipo_inspeccion": ins[1],
+        "tipo_nombre": ins[2],
+        "id_usuario": ins[3],
+        "usuario_nombre": ins[4],
+        "id_ubicacion": ins[5],
+        "ubicacion_nombre": ins[6],
+        "fecha": ins[7],
+        "detalles": detalles,
+    }
+
+
+def fetch_alerta_by_id(id_alerta: int, db: Session) -> dict | None:
+    query = """
+        SELECT a.id_alerta, a.id_detalle, i.nombre as item_nombre, ub.nombre as ubicacion_nombre,
+               a.diferencia, a.resuelta, a.id_estado_alerta, ea.nombre as estado_nombre,
+               a.fecha_generacion, a.fecha_resolucion, a.observaciones,
+               a.id_usuario, u.nombre as usuario_resolutor_nombre
+        FROM ALERTA_DISCREPANCIA a
+        JOIN DETALLE_INSPECCION d ON a.id_detalle = d.id_detalle
+        JOIN INSPECCION ins ON d.id_inspeccion = ins.id_inspeccion
+        JOIN UBICACION ub ON ins.id_ubicacion = ub.id_ubicacion
+        JOIN ITEM i ON d.id_item = i.id_item
+        JOIN ESTADO_ALERTA ea ON a.id_estado_alerta = ea.id_estado_alerta
+        LEFT JOIN USUARIO u ON a.id_usuario = u.id_usuario
+        WHERE a.id_alerta = :id
+    """
+    r = db.execute(text(query), {"id": id_alerta}).fetchone()
+    if not r:
+        return None
+    return {
+        "id_alerta": r[0],
+        "id_detalle": r[1],
+        "item_nombre": r[2],
+        "ubicacion_nombre": r[3],
+        "diferencia": r[4],
+        "resuelta": r[5],
+        "id_estado_alerta": r[6],
+        "estado_nombre": r[7],
+        "fecha_generacion": r[8],
+        "fecha_resolucion": r[9],
+        "observaciones": r[10],
+        "id_usuario": r[11],
+        "usuario_resolutor_nombre": r[12],
+    }
+
+
 @router.get("/tipos", response_model=List[TipoInspeccionResponse])
 def get_tipos_inspeccion(db: Session = Depends(get_db)):
     """Retorna los tipos maestros de inspección (Rutinaria vs Post-Emergencia)."""
@@ -40,13 +126,8 @@ def list_inspecciones(
 ):
     """Lista las inspecciones realizadas en terreno con sus respectivos detalles."""
     query = """
-        SELECT i.id_inspeccion, i.id_tipo_inspeccion, ti.nombre as tipo_nombre,
-               i.id_usuario, u.nombre as usuario_nombre,
-               i.id_ubicacion, ub.nombre as ubicacion_nombre, i.fecha
+        SELECT i.id_inspeccion
         FROM INSPECCION i
-        JOIN TIPO_INSPECCION ti ON i.id_tipo_inspeccion = ti.id_tipo_inspeccion
-        JOIN USUARIO u ON i.id_usuario = u.id_usuario
-        JOIN UBICACION ub ON i.id_ubicacion = ub.id_ubicacion
         WHERE 1=1
     """
     params = {}
@@ -57,48 +138,8 @@ def list_inspecciones(
     query += " ORDER BY i.fecha DESC LIMIT :limit"
     params["limit"] = limit
 
-    inspecciones_rows = db.execute(text(query), params).fetchall()
-    resultado = []
-
-    for ins in inspecciones_rows:
-        detalles_rows = db.execute(
-            text("""
-                SELECT d.id_detalle, d.id_item, it.nombre as item_nombre,
-                       d.cantidad_encontrada, d.cantidad_teorica_actual, d.estado_reportado
-                FROM DETALLE_INSPECCION d
-                JOIN ITEM it ON d.id_item = it.id_item
-                WHERE d.id_inspeccion = :id_ins
-            """),
-            {"id_ins": ins[0]},
-        ).fetchall()
-
-        detalles = [
-            {
-                "id_detalle": d[0],
-                "id_item": d[1],
-                "item_nombre": d[2],
-                "cantidad_encontrada": d[3],
-                "cantidad_teorica_actual": d[4],
-                "estado_reportado": d[5],
-            }
-            for d in detalles_rows
-        ]
-
-        resultado.append(
-            {
-                "id_inspeccion": ins[0],
-                "id_tipo_inspeccion": ins[1],
-                "tipo_nombre": ins[2],
-                "id_usuario": ins[3],
-                "usuario_nombre": ins[4],
-                "id_ubicacion": ins[5],
-                "ubicacion_nombre": ins[6],
-                "fecha": ins[7],
-                "detalles": detalles,
-            }
-        )
-
-    return resultado
+    inspecciones_ids = db.execute(text(query), params).fetchall()
+    return [fetch_inspeccion_by_id(r[0], db=db) for r in inspecciones_ids]
 
 
 @router.post("/", response_model=InspeccionResponse, status_code=status.HTTP_201_CREATED)
@@ -170,8 +211,7 @@ def create_inspeccion(
 
     db.commit()
 
-    # Retornar la inspección recién creada
-    return list_inspecciones(id_ubicacion=insp_in.id_ubicacion, limit=1, db=db)[0]
+    return fetch_inspeccion_by_id(id_inspeccion, db=db)
 
 
 @router.get("/alertas", response_model=List[AlertaResponse])
@@ -181,43 +221,17 @@ def list_alertas(
 ):
     """Lista las alertas de discrepancia registradas en el sistema."""
     query = """
-        SELECT a.id_alerta, a.id_detalle, i.nombre as item_nombre, ub.nombre as ubicacion_nombre,
-               a.diferencia, a.resuelta, a.id_estado_alerta, ea.nombre as estado_nombre,
-               a.fecha_generacion, a.fecha_resolucion, a.observaciones,
-               a.id_usuario, u.nombre as usuario_resolutor_nombre
+        SELECT a.id_alerta
         FROM ALERTA_DISCREPANCIA a
-        JOIN DETALLE_INSPECCION d ON a.id_detalle = d.id_detalle
-        JOIN INSPECCION ins ON d.id_inspeccion = ins.id_inspeccion
-        JOIN UBICACION ub ON ins.id_ubicacion = ub.id_ubicacion
-        JOIN ITEM i ON d.id_item = i.id_item
-        JOIN ESTADO_ALERTA ea ON a.id_estado_alerta = ea.id_estado_alerta
-        LEFT JOIN USUARIO u ON a.id_usuario = u.id_usuario
         WHERE 1=1
     """
-    if solo_pendientes:
+    if solo_pendientes is True:
         query += " AND a.resuelta = FALSE"
 
     query += " ORDER BY a.fecha_generacion DESC"
     rows = db.execute(text(query)).fetchall()
 
-    return [
-        {
-            "id_alerta": r[0],
-            "id_detalle": r[1],
-            "item_nombre": r[2],
-            "ubicacion_nombre": r[3],
-            "diferencia": r[4],
-            "resuelta": r[5],
-            "id_estado_alerta": r[6],
-            "estado_nombre": r[7],
-            "fecha_generacion": r[8],
-            "fecha_resolucion": r[9],
-            "observaciones": r[10],
-            "id_usuario": r[11],
-            "usuario_resolutor_nombre": r[12],
-        }
-        for r in rows
-    ]
+    return [fetch_alerta_by_id(r[0], db=db) for r in rows]
 
 
 @router.post("/alertas/{id_alerta}/resolver", response_model=AlertaResponse)
@@ -258,4 +272,7 @@ def resolver_alerta(
     )
     db.commit()
 
-    return [a for a in list_alertas(db=db) if a["id_alerta"] == id_alerta][0]
+    alerta_actualizada = fetch_alerta_by_id(id_alerta, db=db)
+    if not alerta_actualizada:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Alerta no encontrada tras actualizar")
+    return alerta_actualizada

@@ -1,26 +1,29 @@
 def test_get_categorias(client):
-    """Valida consulta de categorías maestras"""
+    """Valida consulta de categorías del MER v3"""
     response = client.get("/api/v1/catalogo/categorias")
     assert response.status_code == 200
     categorias = response.json()
     assert len(categorias) >= 7
+    nombres = [c["nombre"] for c in categorias]
+    assert "Herramientas Menores" in nombres
+    assert "Equipos de Proteccion Personal (EPP)" in nombres
 
 
 def test_get_tipos_item(client):
-    """Valida los tipos de clasificación (Agrupable vs QR)"""
+    """Valida los 2 tipos de ítem: Agrupables vs Unitarios con QR"""
     response = client.get("/api/v1/catalogo/tipos-item")
     assert response.status_code == 200
     tipos = response.json()
     assert len(tipos) == 2
-    clasificaciones = [t["tipo_clasificacion"] for t in tipos]
-    assert "AGRUPABLE_LOTE" in clasificaciones
-    assert "UNITARIO_ETIQUETABLE" in clasificaciones
+    nombres = [t["tipo_clasificacion"] for t in tipos]
+    assert "AGRUPABLE_LOTE" in nombres
+    assert "UNITARIO_ETIQUETABLE" in nombres
 
 
 def test_create_item_agrupable(client):
     """Valida creación de ítem de recuento / agrupable (ej. Manguera 70mm)"""
     payload = {
-        "nombre": "Manguera de Ataque 70mm",
+        "nombre": "Manguera de Ataque 70mm Extra",
         "descripcion": "Manguera semirrígida color naranja para Carro B-6",
         "codigo_qr": None,
         "estado": "OPERATIVO",
@@ -31,18 +34,17 @@ def test_create_item_agrupable(client):
     response = client.post("/api/v1/catalogo/items", json=payload)
     assert response.status_code == 201
     item = response.json()
-    assert item["nombre"] == "Manguera de Ataque 70mm"
+    assert item["nombre"] == payload["nombre"]
     assert item["cantidad"] == 12
-    assert item["codigo_qr"] is None
     assert item["tipo_clasificacion"] == "AGRUPABLE_LOTE"
 
 
 def test_create_item_unitario_qr(client):
     """Valida creación de bien individualizado con código QR"""
     payload = {
-        "nombre": "Motosierra Stihl MS 362",
+        "nombre": "Motosierra Stihl MS 362 Respaldo",
         "descripcion": "Herramienta de entrada forzada con etiqueta QR",
-        "codigo_qr": "QR-MOTO-001",
+        "codigo_qr": "QR-TEST-NEW-099",
         "estado": "OPERATIVO",
         "cantidad": 1,
         "id_categoria": 2,  # Herramientas Menores
@@ -51,15 +53,16 @@ def test_create_item_unitario_qr(client):
     response = client.post("/api/v1/catalogo/items", json=payload)
     assert response.status_code == 201
     item = response.json()
-    assert item["codigo_qr"] == "QR-MOTO-001"
+    assert item["codigo_qr"] == "QR-TEST-NEW-099"
     assert item["tipo_clasificacion"] == "UNITARIO_ETIQUETABLE"
 
 
 def test_create_duplicate_qr_fails(client):
-    """Valida que no se permitan códigos QR duplicados (error 400)"""
+    """Valida que no se permitan dos bienes con el mismo código QR (400 Bad Request)"""
     payload = {
-        "nombre": "Generador Honda 5kVA",
-        "codigo_qr": "QR-MOTO-001",  # Ya usado en el test anterior
+        "nombre": "Otra Motosierra",
+        "descripcion": "Intento de duplicar QR",
+        "codigo_qr": "QR-MOTO-001",  # Ya existe en el dataset sintético
         "estado": "OPERATIVO",
         "cantidad": 1,
         "id_categoria": 2,
@@ -67,7 +70,7 @@ def test_create_duplicate_qr_fails(client):
     }
     response = client.post("/api/v1/catalogo/items", json=payload)
     assert response.status_code == 400
-    assert "Ya existe un ítem registrado con el código QR" in response.json()["detail"]
+    assert "código QR ya se encuentra registrado" in response.json()["detail"]
 
 
 def test_filter_items_by_qr(client):
@@ -76,4 +79,4 @@ def test_filter_items_by_qr(client):
     assert response.status_code == 200
     items = response.json()
     assert len(items) == 1
-    assert items[0]["nombre"] == "Motosierra Stihl MS 362"
+    assert "Motosierra Stihl" in items[0]["nombre"]

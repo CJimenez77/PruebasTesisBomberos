@@ -340,3 +340,21 @@ ON CONFLICT (id_detalle) DO NOTHING;
 INSERT INTO ALERTA_DISCREPANCIA (id_alerta, id_detalle, id_estado_alerta, id_usuario, diferencia, resuelta, observaciones, fecha_generacion) VALUES
 (1, 2, 1, NULL, -1, FALSE, 'Falta 1 Hacha Pico-Plana tras llamado 10-0-1 en Calle O Higgins con Maipu. Posible extravio en terreno multi-compania.', NOW() - INTERVAL '2 hours')
 ON CONFLICT (id_alerta) DO NOTHING;
+
+-- ==============================================================================
+-- 9. REAJUSTE DE SECUENCIAS SERIALES POSTGRESQL (CRÍTICO PARA INSERT SIN CONFLICTO)
+-- ==============================================================================
+SELECT setval('rol_id_rol_seq', COALESCE((SELECT MAX(id_rol) FROM ROL), 1));
+SELECT setval('usuario_id_usuario_seq', COALESCE((SELECT MAX(id_usuario) FROM USUARIO), 1));
+SELECT setval('tipo_item_id_tipo_item_seq', COALESCE((SELECT MAX(id_tipo_item) FROM TIPO_ITEM), 1));
+SELECT setval('categoria_item_id_categoria_seq', COALESCE((SELECT MAX(id_categoria) FROM CATEGORIA_ITEM), 1));
+SELECT setval('tipo_ubicacion_id_tipo_ubicacion_seq', COALESCE((SELECT MAX(id_tipo_ubicacion) FROM TIPO_UBICACION), 1));
+SELECT setval('tipo_mov_id_tipo_mov_seq', COALESCE((SELECT MAX(id_tipo_mov) FROM TIPO_MOVIMIENTO), 1));
+SELECT setval('tipo_inspeccion_id_tipo_inspeccion_seq', COALESCE((SELECT MAX(id_tipo_inspeccion) FROM TIPO_INSPECCION), 1));
+SELECT setval('estado_alerta_id_estado_alerta_seq', COALESCE((SELECT MAX(id_estado_alerta) FROM ESTADO_ALERTA), 1));
+SELECT setval('ubicacion_id_ubicacion_seq', COALESCE((SELECT MAX(id_ubicacion) FROM UBICACION), 1));
+SELECT setval('item_id_item_seq', COALESCE((SELECT MAX(id_item) FROM ITEM), 1));
+SELECT setval('movimiento_id_movimiento_seq', COALESCE((SELECT MAX(id_movimiento) FROM MOVIMIENTO), 1));
+SELECT setval('inspeccion_id_inspeccion_seq', COALESCE((SELECT MAX(id_inspeccion) FROM INSPECCION), 1));
+SELECT setval('detalle_inspeccion_id_detalle_seq', COALESCE((SELECT MAX(id_detalle) FROM DETALLE_INSPECCION), 1));
+SELECT setval('alerta_discrepancia_id_alerta_seq', COALESCE((SELECT MAX(id_alerta) FROM ALERTA_DISCREPANCIA), 1));

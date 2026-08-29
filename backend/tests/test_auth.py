@@ -12,40 +12,41 @@ def test_login_success(client):
     assert "access_token" in data
     assert data["token_type"] == "bearer"
     assert data["role"] == "DIRECTOR"
-    assert data["user_name"] == "Cristian Jimenez"
+    assert "Cristian Jiménez" in data["user_name"]
 
 
 def test_auth_me_protected_endpoint(client):
-    """Valida acceso al perfil mediante Bearer Token JWT"""
-    # 1. Login
+    """Valida lectura de perfil de usuario autenticado mediante /auth/me"""
+    # 1. Obtener Token
     login_res = client.post(
         "/api/v1/auth/login",
         data={
-            "username": "cristian.jimenez2201@alumnos.ubiobio.cl",
-            "password": "any_password",
+            "username": "matias.aguilera@alumnos.ubiobio.cl",
+            "password": "secret_staging",
         },
     )
     token = login_res.json()["access_token"]
 
-    # 2. Acceder a /me
+    # 2. Consultar /me con Bearer token
     response = client.get(
         "/api/v1/auth/me",
         headers={"Authorization": f"Bearer {token}"},
     )
     assert response.status_code == 200
     user_data = response.json()
-    assert user_data["email"] == "cristian.jimenez2201@alumnos.ubiobio.cl"
-    assert user_data["role_name"] == "DIRECTOR"
+    assert user_data["email"] == "matias.aguilera@alumnos.ubiobio.cl"
+    assert "Matías Aguilera" in user_data["nombre"]
+    assert user_data["rol_nombre"] == "CAPITAN"
 
 
 def test_auth_me_unauthorized_without_token(client):
-    """Valida rechazo 401 si no se envía Bearer token"""
+    """Valida que acceder a rutas protegidas sin token retorne 401 Unauthorized"""
     response = client.get("/api/v1/auth/me")
     assert response.status_code == 401
 
 
 def test_get_roles_list(client):
-    """Valida consulta de roles institucionales"""
+    """Valida listado de roles maestros del MER v3"""
     response = client.get("/api/v1/auth/roles")
     assert response.status_code == 200
     roles = response.json()

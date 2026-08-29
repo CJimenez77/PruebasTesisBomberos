@@ -19,19 +19,26 @@
       <h3 class="text-xs font-bold text-gray-300 uppercase tracking-wider">1. Parámetros de la Inspección</h3>
       <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div>
-          <label class="block text-xs font-bold text-gray-400 mb-1">Unidad a Inspeccionar</label>
-          <select v-model="selectedUnidad" class="w-full bg-bomberos-card border border-bomberos-border rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-bomberos-red">
-            <option value="B-6">Carro Bomba B-6 (Ataque)</option>
-            <option value="R-6">Unidad de Rescate R-6</option>
-            <option value="BODEGA">Bodega Central Cuartel</option>
+          <label class="block text-xs font-bold text-gray-400 mb-1">Unidad a Inspeccionar *</label>
+          <select
+            v-model.number="selectedUnidadId"
+            @change="loadChecklist"
+            class="w-full bg-bomberos-card border border-bomberos-border rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-bomberos-red"
+          >
+            <option :value="1">Carro Bomba B-6 (Ataque)</option>
+            <option :value="2">Unidad de Rescate R-6</option>
+            <option :value="3">Bodega Central Cuartel</option>
           </select>
         </div>
 
         <div>
-          <label class="block text-xs font-bold text-gray-400 mb-1">Tipo de Evento</label>
-          <select v-model="tipoInspeccion" class="w-full bg-bomberos-card border border-bomberos-border rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-bomberos-red">
-            <option value="POST_EMERGENCIA">Post-Emergencia (Retorno Acto de Servicio)</option>
-            <option value="RUTINARIA_PERIODICA">Rutinaria Periódica / Mensual</option>
+          <label class="block text-xs font-bold text-gray-400 mb-1">Tipo de Evento *</label>
+          <select
+            v-model.number="tipoInspeccionId"
+            class="w-full bg-bomberos-card border border-bomberos-border rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-bomberos-red"
+          >
+            <option :value="2">Post-Emergencia (Retorno Acto de Servicio)</option>
+            <option :value="1">Rutinaria Periódica / Semanal</option>
           </select>
         </div>
 
@@ -50,7 +57,7 @@
     <!-- Checklist Items -->
     <div class="bg-bomberos-surface border border-bomberos-border rounded-3xl p-6 shadow-xl space-y-4">
       <div class="flex items-center justify-between border-b border-bomberos-border pb-3">
-        <h3 class="text-xs font-bold text-gray-300 uppercase tracking-wider">2. Recuento de Herramientas & Material</h3>
+        <h3 class="text-xs font-bold text-gray-300 uppercase tracking-wider">2. Recuento de Herramientas & Material Asignado</h3>
         <button
           @click="resetToExpected"
           class="text-xs font-bold text-bomberos-red hover:underline"
@@ -59,10 +66,18 @@
         </button>
       </div>
 
-      <div class="space-y-3">
+      <div v-if="loadingItems" class="text-center py-8 text-xs text-gray-400">
+        Cargando material asignado a la unidad...
+      </div>
+
+      <div v-else-if="itemsChecklist.length === 0" class="text-center py-8 text-xs text-gray-400">
+        No hay herramientas registradas para esta unidad.
+      </div>
+
+      <div v-else class="space-y-3">
         <div
           v-for="item in itemsChecklist"
-          :key="item.id"
+          :key="item.id_item + '-' + item.id_ubicacion"
           class="p-4 rounded-2xl bg-bomberos-card border transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-4"
           :class="item.encontrado < item.esperado ? 'border-red-600/80 bg-red-950/20' : 'border-bomberos-border'"
         >
@@ -70,10 +85,10 @@
             <div class="flex items-center gap-2">
               <span class="font-extrabold text-sm text-white">{{ item.nombre }}</span>
               <span class="text-[10px] px-2 py-0.5 rounded bg-bomberos-surface border border-bomberos-border text-gray-400 font-mono">
-                {{ item.zona }}
+                {{ item.ubicacion_nombre }}
               </span>
             </div>
-            <p class="text-xs text-gray-400 mt-0.5">Stock teórico asignado: <strong class="text-gray-200">{{ item.esperado }}</strong></p>
+            <p class="text-xs text-gray-400 mt-0.5">Stock teórico esperado: <strong class="text-gray-200">{{ item.esperado }}</strong></p>
           </div>
 
           <!-- Counter controls -->
@@ -125,7 +140,7 @@
       <div class="pt-4 border-t border-bomberos-border flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div class="text-xs text-gray-400">
           <span v-if="hasDiscrepancies" class="text-red-400 font-bold">
-            ⚠️ Se generará automáticamente una ALERTA DE DISCREPANCIA para el Capitán.
+            ⚠️ Se generará automáticamente una ALERTA DE DISCREPANCIA para el Capitán y Director.
           </span>
           <span v-else class="text-emerald-400 font-bold">
             ✓ Todo el material coincide con el saldo de inventario.
@@ -134,9 +149,10 @@
 
         <button
           @click="saveInspection"
-          class="px-6 py-3 rounded-xl bg-bomberos-red hover:bg-bomberos-red-hover text-white text-sm font-bold shadow-xl shadow-red-950/50 transition-all flex items-center justify-center gap-2"
+          :disabled="isSubmitting || itemsChecklist.length === 0"
+          class="px-6 py-3 rounded-xl bg-bomberos-red hover:bg-bomberos-red-hover text-white text-sm font-bold shadow-xl shadow-red-950/50 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
         >
-          <span>💾</span> Registrar y Finalizar Inspección
+          <span>💾</span> {{ isSubmitting ? 'Guardando...' : 'Registrar y Finalizar Inspección' }}
         </button>
       </div>
     </div>
@@ -144,36 +160,84 @@
 </template>
 
 <script setup>
-import { computed, reactive, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
+import apiClient from '../api/client'
 import { useAuthStore } from '../stores/auth'
+import { useInspeccionesStore } from '../stores/inspecciones'
+import { useUbicacionesStore } from '../stores/ubicaciones'
 
 const authStore = useAuthStore()
+const inspeccionesStore = useInspeccionesStore()
+const ubicacionesStore = useUbicacionesStore()
 const router = useRouter()
 
-const selectedUnidad = ref('B-6')
-const tipoInspeccion = ref('POST_EMERGENCIA')
+const selectedUnidadId = ref(1) // B-6 por defecto
+const tipoInspeccionId = ref(2) // POST_EMERGENCIA
+const itemsChecklist = ref([])
+const loadingItems = ref(false)
+const isSubmitting = ref(false)
 
-const itemsChecklist = reactive([
-  { id: 1, nombre: 'Mangueras Sintéticas 70mm', zona: 'Cortina Izquierda 1', esperado: 12, encontrado: 12 },
-  { id: 2, nombre: 'Pitón Triple Efecto 50mm', zona: 'Cortina Izquierda 1', esperado: 4, encontrado: 4 },
-  { id: 3, nombre: 'Hacha Pico-Plana', zona: 'Cortina Derecha 1', esperado: 2, encontrado: 1 }, // Discrepancia demo
-  { id: 4, nombre: 'Extintor PQS 10kg', zona: 'Cabina', esperado: 1, encontrado: 1 },
-  { id: 5, nombre: 'Radios Portátiles VHF', zona: 'Cabina', esperado: 2, encontrado: 2 },
-])
+const loadChecklist = async () => {
+  loadingItems.value = true
+  try {
+    await ubicacionesStore.fetchUbicaciones()
+    const subs = ubicacionesStore.ubicaciones.filter(u => u.id_ubicacion_padre === selectedUnidadId.value)
+    const promises = subs.map(s => apiClient.get(`/ubicaciones/${s.id_ubicacion}/stock`))
+    const results = await Promise.all(promises)
+    const combined = results.flatMap(r => r.data)
+
+    itemsChecklist.value = combined.map(item => ({
+      id_item: item.id_item,
+      id_ubicacion: item.id_ubicacion,
+      nombre: item.item_nombre,
+      ubicacion_nombre: item.ubicacion_nombre,
+      esperado: item.cantidad_asignada,
+      encontrado: item.cantidad_asignada,
+      estado: 'OPERATIVO'
+    }))
+  } catch (err) {
+    console.error(err)
+  } finally {
+    loadingItems.value = false
+  }
+}
 
 const hasDiscrepancies = computed(() => {
-  return itemsChecklist.some(i => i.encontrado !== i.esperado)
+  return itemsChecklist.value.some(i => i.encontrado !== i.esperado)
 })
 
 const resetToExpected = () => {
-  itemsChecklist.forEach(i => {
+  itemsChecklist.value.forEach(i => {
     i.encontrado = i.esperado
   })
 }
 
-const saveInspection = () => {
-  alert('¡Inspección registrada con éxito! El libro de guardia y el ledger de movimientos han sido actualizados.')
-  router.push('/')
+const saveInspection = async () => {
+  isSubmitting.value = true
+  const payload = {
+    id_tipo_inspeccion: tipoInspeccionId.value,
+    id_ubicacion: selectedUnidadId.value,
+    detalles: itemsChecklist.value.map(i => ({
+      id_item: i.id_item,
+      cantidad_encontrada: i.encontrado,
+      cantidad_teorica_actual: i.esperado,
+      estado_reportado: i.estado,
+    }))
+  }
+
+  const res = await inspeccionesStore.createInspeccion(payload)
+  isSubmitting.value = false
+
+  if (res.success) {
+    alert('¡Inspección registrada con éxito! Si hubo discrepancias, la alerta fue generada automáticamente.')
+    router.push('/alertas')
+  } else {
+    alert(res.error)
+  }
 }
+
+onMounted(async () => {
+  await loadChecklist()
+})
 </script>

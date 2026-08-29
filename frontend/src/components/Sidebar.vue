@@ -49,6 +49,32 @@
           <span class="text-lg">📋</span>
           <span>Inspección Terreno</span>
         </router-link>
+
+        <router-link
+          to="/alertas"
+          class="flex items-center justify-between px-3.5 py-2.5 rounded-xl font-medium text-sm transition-all duration-150"
+          :class="$route.path === '/alertas' ? 'bg-white/15 text-white font-semibold shadow-inner' : 'text-red-100/80 hover:bg-white/10 hover:text-white'"
+        >
+          <div class="flex items-center gap-3">
+            <span class="text-lg">⚠️</span>
+            <span>Alertas Mando</span>
+          </div>
+          <span
+            v-if="inspeccionesStore.totalAlertasPendientes > 0"
+            class="px-2 py-0.5 rounded-full bg-white text-bomberos-red font-black text-[10px] shadow"
+          >
+            {{ inspeccionesStore.totalAlertasPendientes }}
+          </span>
+        </router-link>
+
+        <router-link
+          to="/movimientos"
+          class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-medium text-sm transition-all duration-150"
+          :class="$route.path === '/movimientos' ? 'bg-white/15 text-white font-semibold shadow-inner' : 'text-red-100/80 hover:bg-white/10 hover:text-white'"
+        >
+          <span class="text-lg">🔄</span>
+          <span>Trazabilidad & Stock</span>
+        </router-link>
       </nav>
     </div>
 
@@ -74,11 +100,20 @@
 </template>
 
 <script setup>
+import { onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
+import { useInspeccionesStore } from '../stores/inspecciones'
 
 const authStore = useAuthStore()
+const inspeccionesStore = useInspeccionesStore()
 const router = useRouter()
+
+onMounted(async () => {
+  if (authStore.isAuthenticated) {
+    await inspeccionesStore.fetchInspecciones()
+  }
+})
 
 const handleLogout = () => {
   authStore.logout()

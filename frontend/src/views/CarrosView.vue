@@ -6,6 +6,13 @@
         <h1 class="text-2xl font-black text-white tracking-tight">Carros y Ubicaciones del Cuartel</h1>
         <p class="text-xs text-gray-400 mt-0.5">Jerarquía de unidades vehiculares, bodegas y material asignado</p>
       </div>
+
+      <router-link
+        to="/movimientos"
+        class="px-4 py-2.5 rounded-xl bg-bomberos-red hover:bg-bomberos-red-hover text-white text-xs font-bold shadow-lg shadow-red-950/40 transition-all flex items-center gap-2"
+      >
+        <span>🔄</span> Trasladar Material
+      </router-link>
     </div>
 
     <!-- Units Cards Grid -->
@@ -25,9 +32,9 @@
           </span>
         </div>
         <h3 class="font-black text-lg text-white">Carro Bomba B-6</h3>
-        <p class="text-xs text-gray-400 mt-1">Unidad de agua y ataque de primera intervención.</p>
+        <p class="text-xs text-gray-400 mt-1">Unidad de agua y ataque de primera intervención (Renault Camiva).</p>
         <div class="mt-4 pt-3 border-t border-bomberos-border/60 flex items-center justify-between text-xs">
-          <span class="text-gray-400">4 Cortinas / Gavetas</span>
+          <span class="text-gray-400">5 Cortinas / Gavetas</span>
           <span class="font-bold text-red-400">Ver inventario →</span>
         </div>
       </div>
@@ -47,9 +54,9 @@
           </span>
         </div>
         <h3 class="font-black text-lg text-white">Unidad de Rescate R-6</h3>
-        <p class="text-xs text-gray-400 mt-1">Rescate vehicular, extricación y trauma.</p>
+        <p class="text-xs text-gray-400 mt-1">Rescate vehicular, extricación pesada y cuerdas.</p>
         <div class="mt-4 pt-3 border-t border-bomberos-border/60 flex items-center justify-between text-xs">
-          <span class="text-gray-400">3 Gavetas / Maletero</span>
+          <span class="text-gray-400">4 Compartimentos</span>
           <span class="font-bold text-red-400">Ver inventario →</span>
         </div>
       </div>
@@ -71,7 +78,7 @@
         <h3 class="font-black text-lg text-white">Bodega Central Cuartel</h3>
         <p class="text-xs text-gray-400 mt-1">Stock de reserva, insumos médicos y pañol de repuestos.</p>
         <div class="mt-4 pt-3 border-t border-bomberos-border/60 flex items-center justify-between text-xs">
-          <span class="text-gray-400">Estantes & Pañol</span>
+          <span class="text-gray-400">3 Estantes / Pañol</span>
           <span class="font-bold text-red-400">Ver inventario →</span>
         </div>
       </div>
@@ -81,7 +88,7 @@
     <div class="bg-bomberos-surface border border-bomberos-border rounded-3xl p-6 shadow-xl space-y-4">
       <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-bomberos-border pb-4">
         <div>
-          <span class="text-xs font-bold text-bomberos-gold uppercase tracking-wider">Detalle de Ubicación</span>
+          <span class="text-xs font-bold text-bomberos-gold uppercase tracking-wider">Inventario en Vivo</span>
           <h2 class="text-xl font-black text-white">{{ activeCarroName }}</h2>
         </div>
         <div class="text-xs text-gray-400 bg-bomberos-card px-3 py-1.5 rounded-xl border border-bomberos-border">
@@ -89,79 +96,45 @@
         </div>
       </div>
 
-      <!-- Sub-locations / Compartments buttons -->
+      <!-- Sub-locations / Compartments list -->
       <div>
-        <h4 class="text-xs font-bold text-gray-300 uppercase tracking-wider mb-2">Compartimentos / Gavetas:</h4>
+        <h4 class="text-xs font-bold text-gray-300 uppercase tracking-wider mb-2">Compartimentos / Zonas Registradas:</h4>
         <div class="flex flex-wrap gap-2">
           <button
-            class="px-3 py-1.5 rounded-xl text-xs font-bold bg-bomberos-red text-white shadow"
+            v-for="sub in subUbicaciones"
+            :key="sub.id_ubicacion"
+            @click="fetchSubStock(sub.id_ubicacion)"
+            class="px-3 py-1.5 rounded-xl text-xs font-bold border transition-all"
+            :class="activeSubId === sub.id_ubicacion ? 'bg-bomberos-red text-white border-bomberos-red' : 'bg-bomberos-card text-gray-300 border-bomberos-border hover:border-gray-400'"
           >
-            Vista General (Todo el Carro)
-          </button>
-          <button
-            class="px-3 py-1.5 rounded-xl text-xs font-bold bg-bomberos-card text-gray-300 border border-bomberos-border hover:border-gray-400"
-          >
-            Cabina de Conducción
-          </button>
-          <button
-            class="px-3 py-1.5 rounded-xl text-xs font-bold bg-bomberos-card text-gray-300 border border-bomberos-border hover:border-gray-400"
-          >
-            Cortina Izquierda 1 (Ataque)
-          </button>
-          <button
-            class="px-3 py-1.5 rounded-xl text-xs font-bold bg-bomberos-card text-gray-300 border border-bomberos-border hover:border-gray-400"
-          >
-            Cortina Derecha 1 (Alimentación)
-          </button>
-          <button
-            class="px-3 py-1.5 rounded-xl text-xs font-bold bg-bomberos-card text-gray-300 border border-bomberos-border hover:border-gray-400"
-          >
-            Techo / Escalas
+            {{ sub.nombre }}
           </button>
         </div>
       </div>
 
       <!-- Stock Table Preview -->
       <div class="overflow-x-auto pt-2">
-        <table class="w-full text-left text-xs text-gray-300">
+        <div v-if="loadingStock" class="text-center py-8 text-xs text-gray-400">
+          Cargando inventario asignado...
+        </div>
+        <div v-else-if="stockList.length === 0" class="text-center py-8 text-xs text-gray-400">
+          No hay ítems asignados directamente a esta gaveta/ubicación.
+        </div>
+        <table v-else class="w-full text-left text-xs text-gray-300">
           <thead class="bg-bomberos-card text-gray-400 uppercase text-[10px] tracking-wider font-extrabold">
             <tr>
               <th class="px-4 py-3 rounded-l-xl">Material / Bien</th>
-              <th class="px-4 py-3">Tipo Clasificación</th>
-              <th class="px-4 py-3">Estado</th>
+              <th class="px-4 py-3">Ubicación Fisiológica</th>
               <th class="px-4 py-3 text-right rounded-r-xl">Cantidad Asignada</th>
             </tr>
           </thead>
           <tbody class="divide-y divide-bomberos-border/40">
-            <tr class="hover:bg-white/5 transition-colors">
+            <tr v-for="stk in stockList" :key="stk.id_item + '-' + stk.id_ubicacion" class="hover:bg-white/5 transition-colors">
               <td class="px-4 py-3 font-bold text-gray-100 flex items-center gap-2">
-                <span>🧯</span> Extintor PQS 10kg ABC
+                <span>📦</span> {{ stk.item_nombre }}
               </td>
-              <td class="px-4 py-3 font-mono text-[11px] text-amber-300">QR-EXT-001 (Unitario)</td>
-              <td class="px-4 py-3">
-                <span class="px-2 py-0.5 rounded bg-emerald-950 text-emerald-400 font-bold text-[10px]">OPERATIVO</span>
-              </td>
-              <td class="px-4 py-3 text-right font-extrabold text-white">1 unidad</td>
-            </tr>
-            <tr class="hover:bg-white/5 transition-colors">
-              <td class="px-4 py-3 font-bold text-gray-100 flex items-center gap-2">
-                <span>🌊</span> Manguera Sintética 70mm x 25m
-              </td>
-              <td class="px-4 py-3 text-gray-400">Agrupable / Por Lote</td>
-              <td class="px-4 py-3">
-                <span class="px-2 py-0.5 rounded bg-emerald-950 text-emerald-400 font-bold text-[10px]">OPERATIVO</span>
-              </td>
-              <td class="px-4 py-3 text-right font-extrabold text-white">12 unidades</td>
-            </tr>
-            <tr class="hover:bg-white/5 transition-colors">
-              <td class="px-4 py-3 font-bold text-gray-100 flex items-center gap-2">
-                <span>🪓</span> Hacha de Bombero Pico-Plana
-              </td>
-              <td class="px-4 py-3 text-gray-400">Agrupable / Por Lote</td>
-              <td class="px-4 py-3">
-                <span class="px-2 py-0.5 rounded bg-emerald-950 text-emerald-400 font-bold text-[10px]">OPERATIVO</span>
-              </td>
-              <td class="px-4 py-3 text-right font-extrabold text-white">2 unidades</td>
+              <td class="px-4 py-3 text-gray-400">{{ stk.ubicacion_nombre }}</td>
+              <td class="px-4 py-3 text-right font-extrabold text-white">{{ stk.cantidad_asignada }} unidades</td>
             </tr>
           </tbody>
         </table>
@@ -171,20 +144,58 @@
 </template>
 
 <script setup>
-import { onMounted, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
+import apiClient from '../api/client'
 import { useUbicacionesStore } from '../stores/ubicaciones'
 
 const ubicacionesStore = useUbicacionesStore()
 const activeCarroId = ref(1)
 const activeCarroName = ref('Carro Bomba B-6')
+const activeSubId = ref(null)
+const stockList = ref([])
+const loadingStock = ref(false)
 
-const selectCarro = (id, name) => {
+const subUbicaciones = computed(() => {
+  return ubicacionesStore.ubicaciones.filter(u => u.id_ubicacion_padre === activeCarroId.value)
+})
+
+const selectCarro = async (id, name) => {
   activeCarroId.value = id
   activeCarroName.value = name
-  ubicacionesStore.fetchStock(id)
+  activeSubId.value = null
+  await fetchAllSubStock(id)
+}
+
+const fetchSubStock = async (subId) => {
+  activeSubId.value = subId
+  loadingStock.value = true
+  try {
+    const res = await apiClient.get(`/ubicaciones/${subId}/stock`)
+    stockList.value = res.data
+  } catch (err) {
+    console.error(err)
+  } finally {
+    loadingStock.value = false
+  }
+}
+
+const fetchAllSubStock = async (parentId) => {
+  loadingStock.value = true
+  try {
+    const subs = ubicacionesStore.ubicaciones.filter(u => u.id_ubicacion_padre === parentId)
+    const promises = subs.map(s => apiClient.get(`/ubicaciones/${s.id_ubicacion}/stock`))
+    const results = await Promise.all(promises)
+    const combined = results.flatMap(r => r.data)
+    stockList.value = combined
+  } catch (err) {
+    console.error(err)
+  } finally {
+    loadingStock.value = false
+  }
 }
 
 onMounted(async () => {
   await ubicacionesStore.fetchUbicaciones()
+  await fetchAllSubStock(1)
 })
 </script>

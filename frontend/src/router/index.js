@@ -4,6 +4,8 @@ import DashboardView from '../views/DashboardView.vue'
 import CatalogoView from '../views/CatalogoView.vue'
 import CarrosView from '../views/CarrosView.vue'
 import InspeccionView from '../views/InspeccionView.vue'
+import AlertasView from '../views/AlertasView.vue'
+import MovimientosView from '../views/MovimientosView.vue'
 import LoginView from '../views/LoginView.vue'
 
 const routes = [
@@ -36,6 +38,18 @@ const routes = [
     name: 'Inspeccion',
     component: InspeccionView,
     meta: { title: 'Inspección en Terreno' }
+  },
+  {
+    path: '/alertas',
+    name: 'Alertas',
+    component: AlertasView,
+    meta: { title: 'Control de Alertas & Discrepancias' }
+  },
+  {
+    path: '/movimientos',
+    name: 'Movimientos',
+    component: MovimientosView,
+    meta: { title: 'Bitácora de Trazabilidad & Traslados' }
   }
 ]
 

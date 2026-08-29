@@ -8,11 +8,9 @@ line-length = 120
 target-version = "py312"
 
 [tool.ruff.lint]
-select = ["E", "F", "I", "B", "UP"]
+select = ["E", "F", "I"]
 ignore = [
     "E501",   # Ignorar longitud de línea en strings largas
-    "B008",   # Permitir FastAPI Depends() en parámetros de funciones
-    "BLE001", # Permitir manejo general de excepciones en healthcheck/lifespan
 ]
 
 [tool.ruff.lint.isort]

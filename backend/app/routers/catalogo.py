@@ -5,7 +5,7 @@ from sqlalchemy import text
 from sqlalchemy.orm import Session
 
 from app.database import get_db
-from app.schemas.catalogo import CategoriaResponse, ItemCreate, ItemResponse, ItemUpdate, TipoItemResponse
+from app.schemas.catalogo import CategoriaResponse, ItemCreate, ItemResponse, TipoItemResponse
 
 router = APIRouter(prefix="/catalogo", tags=["Catálogo de Bienes"])
 
@@ -105,7 +105,7 @@ def create_item(
         RETURNING id_item
     """)
 
-    result = db.execute(
+    db.execute(
         insert_query,
         {
             "nombre": item_in.nombre,
@@ -118,7 +118,6 @@ def create_item(
             "id_tipo_item": item_in.id_tipo_item,
         },
     )
-    new_id = result.scalar()
     db.commit()
 
     # Retornar item completo

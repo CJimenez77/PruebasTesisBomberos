@@ -22,7 +22,7 @@ def test_health_check_endpoint(client):
 
 def test_listar_categorias(client):
     """Valida que el catalogo retorne las categorias institucionales oficiales"""
-    response = client.get("/api/v1/inventario/categorias")
+    response = client.get("/api/v1/catalogo/categorias")
     assert response.status_code == 200
     categorias = response.json()
     assert isinstance(categorias, list)
@@ -33,15 +33,13 @@ def test_listar_categorias(client):
     assert "Vehiculos y Material Mayor" in nombres
 
 
-def test_listar_tipos_movimiento(client):
-    """Valida que los tipos de movimiento maestro de trazabilidad esten cargados"""
-    response = client.get("/api/v1/inventario/tipos-movimiento")
+def test_listar_tipos_ubicacion(client):
+    """Valida que los tipos de ubicacion maestros esten cargados"""
+    response = client.get("/api/v1/ubicaciones/tipos")
     assert response.status_code == 200
     tipos = response.json()
     assert isinstance(tipos, list)
-    assert len(tipos) >= 8
-    tipos_mov = [t["tipo_mov"] for t in tipos]
-    assert "ALTA_COMPRA" in tipos_mov
-    assert "TRASLADO" in tipos_mov
-    assert "EXTRAVIO_EMERGENCIA" in tipos_mov
-    assert "RECUPERACION_POST_SINIESTRO" in tipos_mov
+    assert len(tipos) >= 5
+    tipos_nombres = [t["tipo"] for t in tipos]
+    assert "CARRO_BOMBA" in tipos_nombres
+    assert "BODEGA_CENTRAL" in tipos_nombres

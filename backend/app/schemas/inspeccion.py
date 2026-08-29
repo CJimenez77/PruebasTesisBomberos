@@ -1,25 +1,23 @@
 from datetime import datetime
 from typing import List, Optional
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class TipoInspeccionResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id_tipo_inspeccion: int
     nombre: str
     descripcion: Optional[str] = None
 
-    class Config:
-        from_attributes = True
-
 
 class EstadoAlertaResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id_estado_alerta: int
     nombre: str
     descripcion: Optional[str] = None
-
-    class Config:
-        from_attributes = True
 
 
 class DetalleInspeccionCreate(BaseModel):
@@ -30,15 +28,14 @@ class DetalleInspeccionCreate(BaseModel):
 
 
 class DetalleInspeccionResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id_detalle: int
     id_item: int
     item_nombre: Optional[str] = None
     cantidad_encontrada: int
     cantidad_teorica_actual: int
     estado_reportado: str
-
-    class Config:
-        from_attributes = True
 
 
 class InspeccionCreate(BaseModel):
@@ -48,6 +45,8 @@ class InspeccionCreate(BaseModel):
 
 
 class InspeccionResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id_inspeccion: int
     id_tipo_inspeccion: int
     tipo_nombre: Optional[str] = None
@@ -58,11 +57,10 @@ class InspeccionResponse(BaseModel):
     fecha: datetime
     detalles: List[DetalleInspeccionResponse] = []
 
-    class Config:
-        from_attributes = True
-
 
 class AlertaResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id_alerta: int
     id_detalle: int
     item_nombre: Optional[str] = None
@@ -76,9 +74,6 @@ class AlertaResponse(BaseModel):
     observaciones: Optional[str] = None
     id_usuario: Optional[int] = None
     usuario_resolutor_nombre: Optional[str] = None
-
-    class Config:
-        from_attributes = True
 
 
 class AlertaResolverRequest(BaseModel):

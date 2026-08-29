@@ -1,15 +1,14 @@
 from datetime import datetime
 from typing import List, Optional
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class TipoUbicacionResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id_tipo_ubicacion: int
     tipo: str
-
-    class Config:
-        from_attributes = True
 
 
 class UbicacionBase(BaseModel):
@@ -24,12 +23,11 @@ class UbicacionCreate(UbicacionBase):
 
 
 class UbicacionResponse(UbicacionBase):
+    model_config = ConfigDict(from_attributes=True)
+
     id_ubicacion: int
     tipo_nombre: Optional[str] = None
     sub_ubicaciones: List["UbicacionResponse"] = []
-
-    class Config:
-        from_attributes = True
 
 
 class AsignacionCreate(BaseModel):
@@ -39,12 +37,11 @@ class AsignacionCreate(BaseModel):
 
 
 class AsignacionResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id_item: int
     id_ubicacion: int
     item_nombre: Optional[str] = None
     ubicacion_nombre: Optional[str] = None
     cantidad_asignada: int
     fecha: datetime
-
-    class Config:
-        from_attributes = True

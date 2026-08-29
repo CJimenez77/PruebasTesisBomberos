@@ -1,9 +1,11 @@
 import os
 
-from pydantic_settings import BaseSettings
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
+    model_config = SettingsConfigDict(case_sensitive=True)
+
     PROJECT_NAME: str = "Sistema de Gestión de Inventarios - Bomberos 6ta Compañía"
     API_V1_STR: str = "/api/v1"
 
@@ -17,9 +19,6 @@ class Settings(BaseSettings):
         "DATABASE_URL",
         "postgresql://postgres:bomberos2026_staging_secret@localhost:5432/bomberos_inventario",
     )
-
-    class Config:
-        case_sensitive = True
 
 
 settings = Settings()

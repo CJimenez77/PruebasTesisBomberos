@@ -1,23 +1,21 @@
 from datetime import date
 from typing import Optional
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class CategoriaResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id_categoria: int
     nombre: str
 
-    class Config:
-        from_attributes = True
-
 
 class TipoItemResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id_tipo_item: int
     tipo_clasificacion: str
-
-    class Config:
-        from_attributes = True
 
 
 class ItemBase(BaseModel):
@@ -47,9 +45,8 @@ class ItemUpdate(BaseModel):
 
 
 class ItemResponse(ItemBase):
+    model_config = ConfigDict(from_attributes=True)
+
     id_item: int
     categoria_nombre: Optional[str] = None
     tipo_clasificacion: Optional[str] = None
-
-    class Config:
-        from_attributes = True

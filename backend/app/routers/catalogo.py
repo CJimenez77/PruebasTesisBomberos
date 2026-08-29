@@ -26,10 +26,10 @@ def get_tipos_item(db: Session = Depends(get_db)):
 
 @router.get("/items", response_model=List[ItemResponse])
 def list_items(
-    id_categoria: Optional[int] = Query(None, description="Filtrar por categoría"),
-    id_tipo_item: Optional[int] = Query(None, description="Filtrar por tipo (Agrupable vs QR)"),
-    codigo_qr: Optional[str] = Query(None, description="Buscar por código QR exacto"),
-    q: Optional[str] = Query(None, description="Búsqueda por texto en nombre o descripción"),
+    id_categoria: Optional[int] = Query(default=None, description="Filtrar por categoría"),
+    id_tipo_item: Optional[int] = Query(default=None, description="Filtrar por tipo (Agrupable vs QR)"),
+    codigo_qr: Optional[str] = Query(default=None, description="Buscar por código QR exacto"),
+    q: Optional[str] = Query(default=None, description="Búsqueda por texto en nombre o descripción"),
     db: Session = Depends(get_db),
 ):
     """Listado dinámico de bienes en catálogo con filtros opcionales."""
@@ -44,16 +44,16 @@ def list_items(
     """
     params = {}
 
-    if id_categoria:
+    if id_categoria is not None and isinstance(id_categoria, int):
         query += " AND i.id_categoria = :id_categoria"
         params["id_categoria"] = id_categoria
-    if id_tipo_item:
+    if id_tipo_item is not None and isinstance(id_tipo_item, int):
         query += " AND i.id_tipo_item = :id_tipo_item"
         params["id_tipo_item"] = id_tipo_item
-    if codigo_qr:
+    if codigo_qr is not None and isinstance(codigo_qr, str) and codigo_qr:
         query += " AND i.codigo_qr = :codigo_qr"
         params["codigo_qr"] = codigo_qr
-    if q:
+    if q is not None and isinstance(q, str) and q:
         query += " AND (i.nombre ILIKE :q OR i.descripcion ILIKE :q)"
         params["q"] = f"%{q}%"
 
@@ -76,52 +76,6 @@ def list_items(
         }
         for r in rows
     ]
-
-
-@router.post("/items", response_model=ItemResponse, status_code=status.HTTP_201_CREATED)
-def create_item(
-    item_in: ItemCreate,
-    db: Session = Depends(get_db),
-):
-    """
-    Registra un nuevo bien en el catálogo institucional.
-    Valida que los ítems unitarios (QR) no tengan código duplicado.
-    """
-    # Verificar código QR único si aplica
-    if item_in.codigo_qr:
-        exists = db.execute(
-            text("SELECT id_item FROM ITEM WHERE codigo_qr = :qr"),
-            {"qr": item_in.codigo_qr},
-        ).fetchone()
-        if exists:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"Ya existe un ítem registrado con el código QR: {item_in.codigo_qr}",
-            )
-
-    insert_query = text("""
-        INSERT INTO ITEM (nombre, descripcion, codigo_qr, estado, cantidad, fecha_vencimiento, id_categoria, id_tipo_item)
-        VALUES (:nombre, :descripcion, :codigo_qr, :estado, :cantidad, :fecha_vencimiento, :id_categoria, :id_tipo_item)
-        RETURNING id_item
-    """)
-
-    db.execute(
-        insert_query,
-        {
-            "nombre": item_in.nombre,
-            "descripcion": item_in.descripcion,
-            "codigo_qr": item_in.codigo_qr,
-            "estado": item_in.estado,
-            "cantidad": item_in.cantidad,
-            "fecha_vencimiento": item_in.fecha_vencimiento,
-            "id_categoria": item_in.id_categoria,
-            "id_tipo_item": item_in.id_tipo_item,
-        },
-    )
-    db.commit()
-
-    # Retornar item completo
-    return list_items(q=item_in.nombre, db=db)[0]
 
 
 @router.get("/items/{id_item}", response_model=ItemResponse)
@@ -159,3 +113,49 @@ def get_item_by_id(id_item: int, db: Session = Depends(get_db)):
         "categoria_nombre": row[9],
         "tipo_clasificacion": row[10],
     }
+
+
+@router.post("/items", response_model=ItemResponse, status_code=status.HTTP_201_CREATED)
+def create_item(
+    item_in: ItemCreate,
+    db: Session = Depends(get_db),
+):
+    """
+    Registra un nuevo bien en el catálogo institucional.
+    Valida que los ítems unitarios (QR) no tengan código duplicado.
+    """
+    # Verificar código QR único si aplica
+    if item_in.codigo_qr:
+        exists = db.execute(
+            text("SELECT id_item FROM ITEM WHERE codigo_qr = :qr"),
+            {"qr": item_in.codigo_qr},
+        ).fetchone()
+        if exists:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Ya existe un ítem registrado con el código QR: {item_in.codigo_qr}",
+            )
+
+    insert_query = text("""
+        INSERT INTO ITEM (nombre, descripcion, codigo_qr, estado, cantidad, fecha_vencimiento, id_categoria, id_tipo_item)
+        VALUES (:nombre, :descripcion, :codigo_qr, :estado, :cantidad, :fecha_vencimiento, :id_categoria, :id_tipo_item)
+        RETURNING id_item
+    """)
+
+    result = db.execute(
+        insert_query,
+        {
+            "nombre": item_in.nombre,
+            "descripcion": item_in.descripcion,
+            "codigo_qr": item_in.codigo_qr,
+            "estado": item_in.estado,
+            "cantidad": item_in.cantidad,
+            "fecha_vencimiento": item_in.fecha_vencimiento,
+            "id_categoria": item_in.id_categoria,
+            "id_tipo_item": item_in.id_tipo_item,
+        },
+    )
+    new_id = result.scalar()
+    db.commit()
+
+    return get_item_by_id(id_item=new_id, db=db)

@@ -1,15 +1,14 @@
 from datetime import datetime
 from typing import Optional
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class TipoMovimientoResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id_tipo_mov: int
     tipo_mov: str
-
-    class Config:
-        from_attributes = True
 
 
 class MovimientoCreate(BaseModel):
@@ -22,6 +21,8 @@ class MovimientoCreate(BaseModel):
 
 
 class MovimientoResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id_movimiento: int
     id_item: int
     item_nombre: Optional[str] = None
@@ -36,6 +37,3 @@ class MovimientoResponse(BaseModel):
     cantidad: int
     fecha: datetime
     observaciones: Optional[str] = None
-
-    class Config:
-        from_attributes = True

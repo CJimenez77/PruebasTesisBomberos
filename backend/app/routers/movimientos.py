@@ -11,6 +11,43 @@ from app.schemas.movimiento import MovimientoCreate, MovimientoResponse, TipoMov
 router = APIRouter(prefix="/movimientos", tags=["Movimientos & Ledger Inmutable"])
 
 
+def fetch_movimiento_by_id(id_movimiento: int, db: Session) -> dict | None:
+    query = """
+        SELECT m.id_movimiento, m.id_item, i.nombre as item_nombre,
+               m.id_usuario, u.nombre as usuario_nombre,
+               m.id_tipo_mov, tm.tipo_mov as tipo_movimiento_nombre,
+               m.id_ubicacion_origen, uo.nombre as origen_nombre,
+               m.id_ubicacion_destino, ud.nombre as destino_nombre,
+               m.cantidad, m.fecha, m.observaciones
+        FROM MOVIMIENTO m
+        JOIN ITEM i ON m.id_item = i.id_item
+        JOIN USUARIO u ON m.id_usuario = u.id_usuario
+        JOIN TIPO_MOVIMIENTO tm ON m.id_tipo_mov = tm.id_tipo_mov
+        LEFT JOIN UBICACION uo ON m.id_ubicacion_origen = uo.id_ubicacion
+        LEFT JOIN UBICACION ud ON m.id_ubicacion_destino = ud.id_ubicacion
+        WHERE m.id_movimiento = :id_mov
+    """
+    r = db.execute(text(query), {"id_mov": id_movimiento}).fetchone()
+    if not r:
+        return None
+    return {
+        "id_movimiento": r[0],
+        "id_item": r[1],
+        "item_nombre": r[2],
+        "id_usuario": r[3],
+        "usuario_nombre": r[4],
+        "id_tipo_mov": r[5],
+        "tipo_movimiento_nombre": r[6],
+        "id_ubicacion_origen": r[7],
+        "origen_nombre": r[8],
+        "id_ubicacion_destino": r[9],
+        "destino_nombre": r[10],
+        "cantidad": r[11],
+        "fecha": r[12],
+        "observaciones": r[13],
+    }
+
+
 @router.get("/tipos", response_model=List[TipoMovimientoResponse])
 def get_tipos_movimiento(db: Session = Depends(get_db)):
     """Retorna los tipos maestros de movimiento del sistema."""
@@ -27,18 +64,8 @@ def list_movimientos(
 ):
     """Retorna el historial inmutable de movimientos auditados."""
     query = """
-        SELECT m.id_movimiento, m.id_item, i.nombre as item_nombre,
-               m.id_usuario, u.nombre as usuario_nombre,
-               m.id_tipo_mov, tm.tipo_mov as tipo_movimiento_nombre,
-               m.id_ubicacion_origen, uo.nombre as origen_nombre,
-               m.id_ubicacion_destino, ud.nombre as destino_nombre,
-               m.cantidad, m.fecha, m.observaciones
+        SELECT m.id_movimiento
         FROM MOVIMIENTO m
-        JOIN ITEM i ON m.id_item = i.id_item
-        JOIN USUARIO u ON m.id_usuario = u.id_usuario
-        JOIN TIPO_MOVIMIENTO tm ON m.id_tipo_mov = tm.id_tipo_mov
-        LEFT JOIN UBICACION uo ON m.id_ubicacion_origen = uo.id_ubicacion
-        LEFT JOIN UBICACION ud ON m.id_ubicacion_destino = ud.id_ubicacion
         WHERE 1=1
     """
     params = {}
@@ -53,26 +80,7 @@ def list_movimientos(
     params["limit"] = limit
 
     rows = db.execute(text(query), params).fetchall()
-
-    return [
-        {
-            "id_movimiento": r[0],
-            "id_item": r[1],
-            "item_nombre": r[2],
-            "id_usuario": r[3],
-            "usuario_nombre": r[4],
-            "id_tipo_mov": r[5],
-            "tipo_movimiento_nombre": r[6],
-            "id_ubicacion_origen": r[7],
-            "origen_nombre": r[8],
-            "id_ubicacion_destino": r[9],
-            "destino_nombre": r[10],
-            "cantidad": r[11],
-            "fecha": r[12],
-            "observaciones": r[13],
-        }
-        for r in rows
-    ]
+    return [fetch_movimiento_by_id(r[0], db=db) for r in rows]
 
 
 @router.post("/", response_model=MovimientoResponse, status_code=status.HTTP_201_CREATED)
@@ -133,10 +141,11 @@ def create_movimiento(
         )
 
     # 3. Registrar el movimiento en el Ledger inmutable
-    db.execute(
+    res = db.execute(
         text("""
             INSERT INTO MOVIMIENTO (cantidad, id_tipo_mov, id_item, id_usuario, id_ubicacion_origen, id_ubicacion_destino, observaciones, fecha)
             VALUES (:cantidad, :id_tipo_mov, :id_item, :id_usuario, :id_origen, :id_destino, :obs, NOW())
+            RETURNING id_movimiento
         """),
         {
             "cantidad": mov_in.cantidad,
@@ -148,8 +157,7 @@ def create_movimiento(
             "obs": mov_in.observaciones,
         },
     )
+    new_id = res.scalar()
     db.commit()
 
-    # Retornar el movimiento con sus nombres relacionados
-    mov_list = list_movimientos(id_item=mov_in.id_item, limit=1, db=db)
-    return mov_list[0]
+    return fetch_movimiento_by_id(new_id, db=db)

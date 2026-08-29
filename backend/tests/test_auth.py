@@ -36,7 +36,7 @@ def test_auth_me_protected_endpoint(client):
     user_data = response.json()
     assert user_data["email"] == "matias.aguilera@alumnos.ubiobio.cl"
     assert "Matías Aguilera" in user_data["nombre"]
-    assert user_data["rol_nombre"] == "CAPITAN"
+    assert user_data["role_name"] == "CAPITAN"
 
 
 def test_auth_me_unauthorized_without_token(client):

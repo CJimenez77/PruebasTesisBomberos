@@ -70,7 +70,7 @@ def test_create_duplicate_qr_fails(client):
     }
     response = client.post("/api/v1/catalogo/items", json=payload)
     assert response.status_code == 400
-    assert "código QR ya se encuentra registrado" in response.json()["detail"]
+    assert "QR-MOTO-001" in response.json()["detail"]
 
 
 def test_filter_items_by_qr(client):

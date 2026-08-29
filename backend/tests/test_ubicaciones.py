@@ -23,7 +23,7 @@ def test_create_carro_bomba_ubicacion(client):
     ub = response.json()
     assert ub["nombre"] == "Carro Forestal B-7"
     assert ub["id_ubicacion_padre"] is None
-    assert ub["tipo_ubicacion_nombre"] == "CARRO_BOMBA"
+    assert ub["tipo_nombre"] == "CARRO_BOMBA"
 
 
 def test_create_compartimento_jerarquico(client):

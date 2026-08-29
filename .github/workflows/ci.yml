@@ -1,22 +1,17 @@
-name: CI/CD Pipeline - Modulo Inventarios Bomberos
+name: CI Pipeline - Calidad y Pruebas Automatizadas
 
 on:
   push:
     branches: [ main, develop ]
-    paths:
-      - 'app-inventario-bomberos/**'
-      - '.github/workflows/**'
   pull_request:
     branches: [ main ]
-    paths:
-      - 'app-inventario-bomberos/**'
 
 jobs:
   # ---------------------------------------------------------------------------
-  # FASE 1: Continuous Integration (Linting, Tipado y Pruebas Unitarias)
+  # FASE 1: Continuous Integration (Linting y Pruebas Unitarias con PostgreSQL)
   # ---------------------------------------------------------------------------
   test-and-lint:
-    name: 🧪 Tests & Quality Gates
+    name: 🧪 Quality Gates & Pytest
     runs-on: ubuntu-latest
     
     services:
@@ -36,7 +31,7 @@ jobs:
 
     defaults:
       run:
-        working-directory: ./app-inventario-bomberos/backend
+        working-directory: ./backend
 
     steps:
       - name: 📥 Clonar repositorio
@@ -48,32 +43,33 @@ jobs:
           python-version: '3.12'
           cache: 'pip'
 
-      - name: 📦 Instalar dependencias
+      - name: 📦 Instalar dependencias del Backend
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
           pip install ruff pytest pytest-cov httpx
 
-      - name: 🔍 Linting y Calidad de Código (Ruff)
+      - name: 🔍 Verificación Estática y Linting (Ruff)
         run: |
           ruff check .
 
-      - name: 🚦 Ejecutar Pruebas Automatizadas (Pytest)
+      - name: 🚦 Ejecución de Pruebas Automatizadas (Pytest)
         env:
           DATABASE_URL: postgresql://postgres:test_password_123@localhost:5432/bomberos_inventario_test
         run: |
           pytest --cov=app --cov-report=term-missing tests/
 
   # ---------------------------------------------------------------------------
-  # FASE 2: Continuous Deployment (Despliegue Automatico a Render)
+  # FASE 2: Build Verification (Validar Construcción de Contenedores Docker)
   # ---------------------------------------------------------------------------
-  deploy-staging:
-    name: 🚀 Deploy to Staging (Render Cloud)
+  docker-build-check:
+    name: 🐳 Docker Build Verification
     needs: test-and-lint
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     runs-on: ubuntu-latest
     steps:
-      - name: 📢 Notificación de Despliegue Exitoso
+      - name: 📥 Clonar repositorio
+        uses: actions/checkout@v4
+
+      - name: 🔨 Probar Construcción de Imagen Docker
         run: |
-          echo "Todos los tests de calidad pasaron exitosamente."
-          echo "Render detecta el commit en 'main' y aplica Auto-Deploy de inmediato."
+          docker compose build

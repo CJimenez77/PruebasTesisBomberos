@@ -1,7 +1,8 @@
 services:
+  # Base de Datos PostgreSQL 16
   db:
     image: postgres:16-alpine
-    container_name: bomberos_postgres_staging
+    container_name: bomberos_db
     restart: always
     environment:
       POSTGRES_USER: postgres
@@ -10,7 +11,7 @@ services:
     ports:
       - "5432:5432"
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - pgdata:/var/lib/postgresql/data
       - ./init-db.sql:/docker-entrypoint-initdb.d/init-db.sql:ro
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres -d bomberos_inventario"]
@@ -18,18 +19,17 @@ services:
       timeout: 5s
       retries: 5
 
-  api:
+  # API REST FastAPI (Backend Python 3.12)
+  backend:
     build:
       context: ./backend
       dockerfile: Dockerfile
-    container_name: bomberos_fastapi_staging
+    container_name: bomberos_backend
     restart: always
     environment:
-      DB_USER: postgres
-      DB_PASSWORD: bomberos2026_staging_secret
-      DB_HOST: db
-      DB_PORT: "5432"
-      DB_NAME: bomberos_inventario
+      - DATABASE_URL=postgresql://postgres:bomberos2026_staging_secret@db:5432/bomberos_inventario
+      - SECRET_KEY=bomberos_super_secret_jwt_key_2026_production_grade_security
+      - ENVIRONMENT=staging
     ports:
       - "8000:8000"
     depends_on:
@@ -38,6 +38,22 @@ services:
     volumes:
       - ./backend/app:/app/app
 
+  # Aplicación Web Vue 3 + Tailwind (Frontend)
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: bomberos_frontend
+    restart: always
+    environment:
+      - VITE_API_URL=http://localhost:8000/api/v1
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+    volumes:
+      - ./frontend/src:/app/src
+      - ./frontend/public:/app/public
+
 volumes:
-  postgres_data:
-    driver: local
+  pgdata:

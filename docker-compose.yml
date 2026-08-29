@@ -46,7 +46,7 @@ services:
     container_name: bomberos_frontend
     restart: always
     environment:
-      - VITE_API_URL=http://localhost:8000/api/v1
+      - VITE_BACKEND_URL=http://backend:8000
     ports:
       - "3000:3000"
     depends_on:
@@ -54,6 +54,7 @@ services:
     volumes:
       - ./frontend/src:/app/src
       - ./frontend/public:/app/public
+      - ./frontend/vite.config.js:/app/vite.config.js
 
 volumes:
   pgdata:

@@ -1,7 +1,8 @@
 import axios from 'axios'
 
+// Usar ruta relativa /api/v1 para que Vite proxy reenvíe a http://backend:8000 en Codespaces o local
 const apiClient = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || '/api/v1',
+  baseURL: '/api/v1',
   headers: {
     'Content-Type': 'application/json',
   },

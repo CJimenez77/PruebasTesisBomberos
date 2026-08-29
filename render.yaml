@@ -16,5 +16,5 @@ services:
 databases:
   - name: bomberos-db
     databaseName: bomberos_inventario
-    user: postgres
+    user: bomberos_admin
     plan: free
